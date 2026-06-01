@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+model-smoke-results/
+.mypy_cache/
+
+# certfix-generated reports, fixed-code candidates, and patches
+certfix-output/
+
+# Local model smoke configs
+configs/local-*.yaml
+configs/local-*.yml
+
+# Build
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Models (large files)
+*.gguf
+*.bin
+models/
+
+# MCP (local tool config)
+.mcp.json
+mcp-servers/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local/private maintainer notes not included in the initial public repo
+docs/research-archive/
+CLAUDE.md
+README.ja.local.md
+
+# Locally generated maintainer evaluation datasets
+src/certfix/data/*samples.jsonl.gz
+eval-splits/

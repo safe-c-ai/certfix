@@ -1,0 +1,7 @@
+#include <stdio.h>
+
+int main(void) {
+    int x;
+    printf("%d\n", x);  /* uninitialized read */
+    return 0;
+}

@@ -1,0 +1,29 @@
+# Release-default Qwen3.6 check profile.
+#
+# Start an MTP-capable llama.cpp server first. The server must support
+# `--spec-type draft-mtp`. Non-MTP llama-server execution is only an explicit
+# fallback path.
+#
+#   llama-server -m /path/to/qwen3.6-27b-mtp-ud-q4_k_xl.gguf \
+#     -ngl 99 -c 8192 -fa on -np 1 \
+#     --host 127.0.0.1 --port 8952 \
+#     --cache-ram 0 \
+#     --spec-type draft-mtp --spec-draft-n-max 2
+
+detection:
+  backend: local_llama_server
+  prompt_profile: qwen36_certfix_check_v1
+  batch_size: 1
+  qwen36_rule_id_strategy: sequential_top2_p3
+  qwen36_selector_candidate_k: 2
+  qwen36_selector_permutations: 3
+  api:
+    base_url: http://127.0.0.1:8952/v1
+    model: unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL
+    api_key_env: ""
+    timeout: 300
+    max_tokens: 1024
+    temperature: 0.0
+
+check:
+  exclude: []

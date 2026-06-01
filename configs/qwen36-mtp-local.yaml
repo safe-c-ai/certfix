@@ -1,0 +1,72 @@
+# Release-default local Qwen3.6 profile for check and fix.
+#
+# Start an MTP-capable llama.cpp server first. The server must support
+# `--spec-type draft-mtp`. Non-MTP llama-server execution is only an explicit
+# fallback path.
+#
+#   llama-server -m /path/to/qwen3.6-27b-mtp-ud-q4_k_xl.gguf \
+#     -ngl 99 -c 8192 -fa on -np 1 \
+#     --host 127.0.0.1 --port 8952 \
+#     --cache-ram 0 \
+#     --spec-type draft-mtp --spec-draft-n-max 2 \
+#     --reasoning-budget 1024
+
+detection:
+  backend: local_llama_server
+  prompt_profile: qwen36_certfix_check_v1
+  batch_size: 1
+  qwen36_rule_id_strategy: sequential_top2_p3
+  qwen36_selector_candidate_k: 2
+  qwen36_selector_permutations: 3
+  api:
+    base_url: http://127.0.0.1:8952/v1
+    model: unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL
+    api_key_env: ""
+    timeout: 300
+    max_tokens: 1024
+    temperature: 0.0
+
+models:
+  qwen36_local:
+    backend: local_llama_server
+    profile: qwen36_27b_local
+    max_tokens: 4096
+    temperature: 0.0
+    api:
+      base_url: http://127.0.0.1:8952/v1
+      model: unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL
+      api_key_env: ""
+      timeout: 300
+      max_tokens: 4096
+      temperature: 0.0
+
+validation:
+  compile:
+    enabled: true
+    command: gcc
+    args: ["-fsyntax-only"]
+    include_paths: []
+    timeout: 30
+  violation_removal:
+    enabled: true
+    detector_role: qwen36_local
+    method: non_target_advisory
+    max_tokens: 512
+    override_denylist: ["SIG34-C", "STR31-C"]
+  semantic:
+    enabled: true
+    reviewer_role: qwen36_local
+    block_on_uncertain: true
+
+fix:
+  simple_repairer_role: qwen36_local
+  simple_repair_profile: qwen36_27b_complete_repair_rule_guided_v1
+  simple_max_tokens: 4096
+  validate_guided_retry: true
+  retry_max_attempts: 1
+  retry_max_tokens: 4096
+  retry_rule_addenda_v1: true
+  retry_rule_addenda_rule_ids: ["ARR37-C", "CON31-C", "POS48-C", "SIG30-C", "ENV33-C"]
+
+check:
+  exclude: []

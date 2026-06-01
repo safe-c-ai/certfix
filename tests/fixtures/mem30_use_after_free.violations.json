@@ -1,0 +1,11 @@
+[
+  {
+    "rule_id": "MEM30-C",
+    "file_path": "tests/fixtures/mem30_use_after_free.c",
+    "line": 9,
+    "column": 5,
+    "message": "CERT-C MEM30-C: Do not access freed memory",
+    "severity": "error",
+    "code_snippet": "    printf(\"%s\\n\", p);  /* use after free */"
+  }
+]

@@ -1,0 +1,79 @@
+# DeepSeek V4 Flash via DeepSeek API.
+#
+# This profile uses DeepSeek's OpenAI-compatible `/chat/completions` API
+# directly. It is intended for users who prefer the official DeepSeek endpoint
+# over OpenRouter provider routing.
+#
+# Required environment:
+#
+#   export DEEPSEEK_API_KEY=...
+#
+# Security note:
+#
+#   Source code is sent to DeepSeek's API. Use the OpenRouter/DeepInfra profile
+#   or local Qwen3.6 runtime if data residency or vendor policy requires it.
+
+detection:
+  backend: api
+  prompt_profile: qwen36_certfix_check_v1
+  batch_size: 1
+  qwen36_rule_id_strategy: sequential_top2_p3
+  qwen36_selector_candidate_k: 2
+  qwen36_selector_permutations: 3
+  api:
+    base_url: https://api.deepseek.com
+    model: deepseek-v4-flash
+    api_key_env: DEEPSEEK_API_KEY
+    timeout: 300
+    max_tokens: 1024
+    temperature: 0.0
+    retry_attempts: 8
+    retry_initial_delay: 5.0
+    retry_max_delay: 90.0
+    extra_body: {}
+
+models:
+  deepseek_v4_flash:
+    backend: api
+    profile: deepseek_v4_flash
+    max_tokens: 4096
+    temperature: 0.0
+    api:
+      base_url: https://api.deepseek.com
+      model: deepseek-v4-flash
+      api_key_env: DEEPSEEK_API_KEY
+      timeout: 300
+      max_tokens: 4096
+      temperature: 0.0
+      retry_attempts: 8
+      retry_initial_delay: 5.0
+      retry_max_delay: 90.0
+      extra_body: {}
+
+validation:
+  compile:
+    enabled: true
+    command: gcc
+    args: ["-fsyntax-only"]
+    include_paths: []
+    timeout: 30
+  violation_removal:
+    enabled: true
+    detector_role: deepseek_v4_flash
+    method: non_target_advisory
+    max_tokens: 512
+    override_denylist: ["SIG34-C", "STR31-C"]
+  semantic:
+    enabled: true
+    reviewer_role: deepseek_v4_flash
+    block_on_uncertain: true
+
+fix:
+  simple_repairer_role: deepseek_v4_flash
+  simple_repair_profile: qwen36_27b_complete_repair_rule_guided_v1
+  simple_max_tokens: 4096
+  validate_guided_retry: true
+  retry_max_attempts: 1
+  retry_max_tokens: 4096
+  retry_rule_addenda_v1: true
+  retry_rule_addenda_rule_ids: ["ARR37-C", "CON31-C", "POS48-C", "SIG30-C", "ENV33-C"]

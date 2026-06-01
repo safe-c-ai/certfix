@@ -1,0 +1,11 @@
+[
+  {
+    "rule_id": "STR31-C",
+    "file_path": "tests/fixtures/str31_buffer_overflow.c",
+    "line": 6,
+    "column": 5,
+    "message": "CERT-C STR31-C: Guarantee that storage for strings has sufficient space for character data and the null terminator",
+    "severity": "error",
+    "code_snippet": "    strcpy(buf, \"this string is way too long for buf\");  /* buffer overflow */"
+  }
+]

@@ -1,0 +1,90 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "certfix"
+version = "0.1.0"
+description = "CERT-C issue candidate detector and fixed-code candidate generator for C code"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "certfix team" }
+]
+keywords = ["security", "c", "cert-c", "static-analysis", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "click>=8.0.0",
+    "httpx>=0.25.0",
+    "pyyaml>=6.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.0.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+    "jsonschema>=4.0.0",
+]
+
+[project.scripts]
+certfix = "certfix.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/safe-c-ai/certfix"
+Documentation = "https://github.com/safe-c-ai/certfix#readme"
+Repository = "https://github.com/safe-c-ai/certfix"
+Issues = "https://github.com/safe-c-ai/certfix/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/certfix"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"THIRD_PARTY_NOTICES.md" = "certfix/THIRD_PARTY_NOTICES.md"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/CLAUDE.md",
+    "/docs/research-archive",
+    "/eval-splits",
+    "/model-smoke-results",
+    "/src/certfix/data/*samples.jsonl.gz",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=certfix --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src/certfix"]
+branch = true
