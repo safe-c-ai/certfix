@@ -52,6 +52,10 @@ chat-completions API.
 - **Local default**: `configs/qwen36-mtp-local.yaml` points to
   `http://127.0.0.1:8952/v1`, where the user runs an MTP-capable
   `llama-server` for `unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL`.
+- **Local Docker Compose**: `configs/qwen36-mtp-docker.yaml` uses the same
+  Qwen3.6-centered pipeline but points to
+  `http://llama-server:8952/v1`, the service name used by
+  `docker-compose.local-qwen36.yml`.
 - **API profiles**: OpenRouter and DeepSeek API profiles use the same request
   path but send source code to the configured provider.
 - **Step routing**: advanced profiles can route detection, repair, retry, and

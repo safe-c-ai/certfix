@@ -280,6 +280,7 @@ def fix(
 
 CONFIG_PROFILES: dict[str, str] = {
     "qwen36-mtp-local": "qwen36-mtp-local.yaml",
+    "qwen36-mtp-docker": "qwen36-mtp-docker.yaml",
     "qwen36-mtp-check": "qwen36-mtp-check.yaml",
     "deepseek-v4-flash-openrouter": "deepseek-v4-flash-openrouter.yaml",
     "deepseek-v4-flash-api": "deepseek-v4-flash-api.yaml",

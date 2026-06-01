@@ -480,6 +480,7 @@ class TestPublicConfigFiles:
         """README-facing configs should stay parseable."""
         public_configs = [
             "configs/qwen36-mtp-local.yaml",
+            "configs/qwen36-mtp-docker.yaml",
             "configs/qwen36-mtp-check.yaml",
             "configs/deepseek-v4-flash-openrouter.yaml",
             "configs/deepseek-v4-flash-api.yaml",
@@ -499,6 +500,7 @@ class TestPublicConfigFiles:
 
         assert result.exit_code == 0
         assert "qwen36-mtp-local" in result.output
+        assert "qwen36-mtp-docker" in result.output
         assert "deepseek-v4-flash-api" in result.output
 
     def test_config_command_writes_bundled_profile(self, tmp_path: Path) -> None:
@@ -516,6 +518,21 @@ class TestPublicConfigFiles:
         cfg = Config.load(output)
         assert cfg.detection.backend == "local_llama_server"
         assert "qwen36_local" in cfg.models
+
+    def test_config_command_writes_docker_profile(self, tmp_path: Path) -> None:
+        """Docker profile should use the Compose service hostname."""
+        output = tmp_path / ".certfix.yaml"
+
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            ["config", "qwen36-mtp-docker", "--output", str(output)],
+        )
+
+        assert result.exit_code == 0
+        cfg = Config.load(output)
+        assert cfg.detection.api.base_url == "http://llama-server:8952/v1"
+        assert cfg.models["qwen36_local"].api.base_url == "http://llama-server:8952/v1"
 
     def test_config_command_refuses_overwrite_without_force(self, tmp_path: Path) -> None:
         """Existing output files should not be overwritten unless --force is set."""

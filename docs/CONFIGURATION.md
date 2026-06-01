@@ -17,6 +17,7 @@ Create a config from one of the bundled profiles:
 
 ```bash
 certfix config qwen36-mtp-local --output .certfix.yaml
+certfix config qwen36-mtp-docker --output .certfix.yaml
 certfix config deepseek-v4-flash-openrouter --output .certfix.yaml
 ```
 
@@ -30,6 +31,7 @@ Profile names are CLI names, not file paths. For example,
 | Profile | Purpose |
 |---------|---------|
 | `qwen36-mtp-local` | Local Qwen3.6-27B MTP check and fix |
+| `qwen36-mtp-docker` | Local Qwen3.6-27B MTP check and fix through Docker Compose |
 | `qwen36-mtp-check` | Local Qwen3.6-27B check only |
 | `deepseek-v4-flash-openrouter` | DeepSeek V4 Flash through OpenRouter |
 | `deepseek-v4-flash-api` | DeepSeek V4 Flash through DeepSeek's official API |
@@ -137,6 +139,11 @@ detection:
 The same server route is also configured under `models.<role>.api` for repair
 and validation roles. If you change the local `base_url` or `model`, update both
 places in profiles that include a `models` section.
+
+Use `qwen36-mtp-local` when certfix runs on the host and talks to
+`http://127.0.0.1:8952/v1`. Use `qwen36-mtp-docker` when certfix runs inside
+`docker-compose.local-qwen36.yml`; that profile points to the Compose service
+URL `http://llama-server:8952/v1`.
 
 ### Long Functions And Token Limits
 

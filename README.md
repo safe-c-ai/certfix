@@ -194,6 +194,20 @@ certfix fix examples/input/ --output-dir examples/certfix-output
 
 This path keeps inference local and does not send code to a cloud API.
 
+For Docker Compose, use the `qwen36-mtp-docker` profile instead. It points
+certfix at the Compose service URL `http://llama-server:8952/v1` rather than
+`127.0.0.1`.
+
+```bash
+export LLAMA_SERVER_IMAGE=<mtp-capable-llama-server-image>
+docker compose -f docker-compose.local-qwen36.yml up -d llama-server
+docker compose -f docker-compose.local-qwen36.yml run --rm certfix config qwen36-mtp-docker --output .certfix.yaml --force
+docker compose -f docker-compose.local-qwen36.yml run --rm certfix doctor
+```
+
+See [docs/DOCKER.md](docs/DOCKER.md) for the full local Compose flow and host
+GPU/runtime requirements.
+
 ### API And Local Combined
 
 This profile uses local Qwen3.6-27B for detection and DeepSeek V4 Flash for
@@ -342,6 +356,7 @@ Bundled profiles:
 | Purpose | Profile | Notes |
 |---------|---------|-------|
 | Local standard | `qwen36-mtp-local` | Local Qwen3.6-27B MTP for detection and repair |
+| Local Docker Compose | `qwen36-mtp-docker` | Local Qwen3.6-27B MTP through the Compose `llama-server` service |
 | Local check only | `qwen36-mtp-check` | Detection without repair |
 | API only: DeepSeek | `deepseek-v4-flash-openrouter` | DeepSeek V4 Flash through OpenRouter |
 | API only: Gemini | `gemini-3-flash-preview-openrouter` | Gemini 3 Flash Preview through OpenRouter |
@@ -362,6 +377,8 @@ Selection guideline:
 
 - Use `qwen36-mtp-local` when you have a local GPU and do not want to send code
   to an external API.
+- Use `qwen36-mtp-docker` when certfix runs in Docker Compose beside a
+  `llama-server` service.
 - Use `deepseek-v4-flash-openrouter` when you do not have a local GPU and want a
   lower-cost API route.
 - Use `local-detection-deepseek-fix` when you have local Qwen3.6 detection but
@@ -369,8 +386,9 @@ Selection guideline:
 - Use `gemini-3-flash-preview-openrouter` when API repair quality matters more
   than cost.
 
-API routes send source code to the configured provider. For v0.1.1, the only
-supported local LLM profile is Qwen3.6-27B MTP through `llama-server`.
+API routes send source code to the configured provider. Local Qwen3.6 profiles
+use an external MTP-capable `llama-server`; certfix does not load GGUF files
+in-process.
 
 ## Configuration
 
@@ -474,7 +492,7 @@ The main public documents are:
 | Document | Purpose |
 |----------|---------|
 | [docs/INDEX.md](docs/INDEX.md) | Documentation index |
-| [docs/DOCKER.md](docs/DOCKER.md) | API-only Docker and Docker Compose usage |
+| [docs/DOCKER.md](docs/DOCKER.md) | API-only Docker and local Qwen Docker Compose usage |
 | [docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Config lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
 | [docs/SUPPORTED_RULES.md](docs/SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |

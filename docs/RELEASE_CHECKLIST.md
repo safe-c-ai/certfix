@@ -18,6 +18,7 @@ manual because they depend on local servers and provider credentials.
 
 - [ ] README-facing configs load with `Config.load()`:
   - `configs/qwen36-mtp-local.yaml`
+  - `configs/qwen36-mtp-docker.yaml`
   - `configs/qwen36-mtp-check.yaml`
   - `configs/deepseek-v4-flash-openrouter.yaml`
   - `configs/deepseek-v4-flash-api.yaml`
@@ -48,6 +49,8 @@ manual because they depend on local servers and provider credentials.
   selected local profile clearly.
 - [ ] `certfix config qwen36-mtp-local --output .certfix.yaml` writes the
   bundled local profile.
+- [ ] `certfix config qwen36-mtp-docker --output .certfix.yaml` writes the
+  bundled Docker Compose local profile.
 - [ ] `certfix check <sample.c> --config configs/qwen36-mtp-local.yaml --output-dir certfix-output` runs.
 - [ ] `certfix fix <sample.c> --config configs/qwen36-mtp-local.yaml --output-dir certfix-output`
   runs on a small smoke case.
@@ -81,6 +84,8 @@ log. Wheel install-equivalent config list/write/doctor/check also passed.
 - [ ] README Quick Start uses a real public config.
 - [ ] README distinguishes local, cheap API, direct DeepSeek API, quality API,
   and advanced step-routing profiles.
+- [ ] Docker docs distinguish API-only Docker from local Qwen3.6 Docker Compose
+  and state the host GPU/runtime requirements.
 - [ ] Public docs avoid internal Phase/Run/checkpoint identifiers as primary
   user guidance.
 - [ ] `CLAUDE.md` and `docs/research-archive/` are not present in the initial

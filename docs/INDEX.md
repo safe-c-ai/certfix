@@ -9,7 +9,7 @@ commands, model profiles, limitations, and license information.
 | Document | Purpose |
 | --- | --- |
 | [../README.md](../README.md) | User guide, quick start, commands, profiles, limitations, and license |
-| [DOCKER.md](DOCKER.md) | API-only Docker and Docker Compose usage |
+| [DOCKER.md](DOCKER.md) | API-only Docker and local Qwen Docker Compose usage |
 | [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [CONFIGURATION.md](CONFIGURATION.md) | `.certfix.yaml` lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
 | [SUPPORTED_RULES.md](SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |

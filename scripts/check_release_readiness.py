@@ -30,6 +30,7 @@ SRC = ROOT / "src"
 
 PUBLIC_CONFIGS = [
     "configs/qwen36-mtp-local.yaml",
+    "configs/qwen36-mtp-docker.yaml",
     "configs/qwen36-mtp-check.yaml",
     "configs/deepseek-v4-flash-openrouter.yaml",
     "configs/deepseek-v4-flash-api.yaml",
@@ -49,6 +50,7 @@ PUBLIC_SCAN_PATHS = [
     "README.md",
     "THIRD_PARTY_NOTICES.md",
     "configs/qwen36-mtp-local.yaml",
+    "configs/qwen36-mtp-docker.yaml",
     "configs/qwen36-mtp-check.yaml",
     "configs/deepseek-v4-flash-openrouter.yaml",
     "configs/deepseek-v4-flash-api.yaml",
@@ -168,6 +170,7 @@ def check_bundled_config_profiles() -> list[CheckResult]:
     results: list[CheckResult] = []
     expected_names = {
         "qwen36-mtp-local",
+        "qwen36-mtp-docker",
         "qwen36-mtp-check",
         "deepseek-v4-flash-openrouter",
         "deepseek-v4-flash-api",
@@ -216,6 +219,7 @@ def check_bundled_config_profiles() -> list[CheckResult]:
 def check_config_cli_list() -> CheckResult:
     expected = {
         "qwen36-mtp-local",
+        "qwen36-mtp-docker",
         "qwen36-mtp-check",
         "deepseek-v4-flash-openrouter",
         "deepseek-v4-flash-api",
