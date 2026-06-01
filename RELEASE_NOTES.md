@@ -1,4 +1,41 @@
-# certfix 0.1.0 Release Notes
+# certfix Release Notes
+
+## certfix 0.1.1
+
+Patch release focused on release polish and validation guardrail coverage.
+
+### Changes
+
+- Added GitHub Actions CI for linting, tests, builds, release-readiness checks,
+  wheel smoke tests, and Docker image smoke tests.
+- Added API-only Docker support through `Dockerfile`, `docker-compose.api.yml`,
+  GHCR publishing, and `docs/DOCKER.md`.
+- Added `SECURITY.md` and README example-output documentation.
+- Clarified `certfix fix` output when no fixed-code candidates are generated.
+- Clarified that Non-MTP `llama-server` execution is not the verified local
+  profile.
+- Expanded programmatic semantic-risk check tests from 2 to 22 cases, covering
+  release and candidate/no-signal presets.
+- Fixed two conservative programmatic check gaps:
+  - `ENV33-C` now detects `exec*(..., argv)` replacements when the executable
+    argument is an expression such as `argv[0]`.
+  - `MEM36-C` now evaluates the `memcpy` copy-size argument instead of treating
+    destination/source names as clamp evidence.
+
+### Compatibility
+
+- No new runtime dependency is required.
+- The standard install remains:
+
+```bash
+pip install certfix
+```
+
+- The local Qwen3.6 MTP route still requires an external MTP-capable
+  `llama-server`.
+- API profiles still send source code to the configured provider.
+
+## certfix 0.1.0
 
 Initial public release for `certfix`, a CLI for detecting CERT-C issue
 candidates and generating fixed-code candidates for C source code with local or

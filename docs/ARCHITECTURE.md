@@ -5,7 +5,7 @@
 certfix is a CLI tool for detecting CERT-C issue candidates and generating
 fixed-code candidates for C source code with LLMs.
 
-This document describes the public v0.1.0 release implementation. The default
+This document describes the public v0.1.1 release implementation. The default
 local workflow is centered on Qwen3.6-27B MTP served by an external
 OpenAI-compatible `llama-server`. API profiles use the same OpenAI-compatible
 backend interface.
@@ -20,11 +20,11 @@ backend interface.
    Qwen3.6-27B MTP server. Cloud/API profiles are optional.
 4. **Explicit runtime boundary**: certfix talks to local servers and cloud
    providers through OpenAI-compatible HTTP APIs. It does not load GGUF files
-   in-process in v0.1.0.
+   in-process in v0.1.1.
 5. **Machine-readable output**: JSON/SARIF output and exit codes are available
    for automation, while validation caveats remain explicit.
 
-certfix v0.1.0 uses a bundled compact catalog of 115 CERT-C rule targets. See
+certfix v0.1.1 uses a bundled compact catalog of 115 CERT-C rule targets. See
 [SUPPORTED_RULES.md](SUPPORTED_RULES.md) for category coverage and catalog
 limitations.
 
@@ -57,7 +57,7 @@ chat-completions API.
 - **Step routing**: advanced profiles can route detection, repair, retry, and
   validation steps to different configured roles.
 
-The v0.1.0 public path does not expose `llama-cpp-python` or other in-process
+The v0.1.1 public path does not expose `llama-cpp-python` or other in-process
 GGUF loading.
 
 ## Main Pipelines
