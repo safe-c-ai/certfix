@@ -1,5 +1,7 @@
 # certfix
 
+[![CI](https://github.com/safe-c-ai/certfix/actions/workflows/ci.yml/badge.svg)](https://github.com/safe-c-ai/certfix/actions/workflows/ci.yml)
+
 certfix is a CLI tool for detecting CERT-C issue candidates and generating
 fixed-code candidates for C source code with LLMs.
 
