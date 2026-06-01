@@ -199,6 +199,36 @@ certfix check examples/input/ --output-dir examples/certfix-output
 certfix fix examples/input/ --output-dir examples/certfix-output
 ```
 
+## Example Output
+
+For `certfix check`, the output directory contains machine-readable reports:
+
+```text
+examples/certfix-output/
++-- reports/
+|   +-- check.json
+|   +-- check.sarif
+|   `-- summary.json
+```
+
+For `certfix fix`, certfix writes reviewable fixed-code candidates and patches
+without editing the original source files:
+
+```text
+examples/certfix-output/
++-- reports/
+|   +-- fixes.json
+|   +-- fixes.sarif
+|   `-- summary.json
++-- fixes/
+|   `-- mem30_use_after_free.fixed.c
+`-- patches/
+    `-- mem30_use_after_free.c.patch
+```
+
+Paths vary by input file and function name. Treat generated code and patches as
+candidates for manual review, not as automatic source changes.
+
 ## Commands
 
 Basic flow:
