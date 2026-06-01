@@ -1,8 +1,8 @@
 # Release-default local Qwen3.6 profile for check and fix.
 #
 # Start an MTP-capable llama.cpp server first. The server must support
-# `--spec-type draft-mtp`. Non-MTP llama-server execution is only an explicit
-# fallback path.
+# `--spec-type draft-mtp`. Non-MTP llama-server execution is not the verified
+# v0.1.0 local profile; use it only intentionally after testing your runtime.
 #
 #   llama-server -m /path/to/qwen3.6-27b-mtp-ud-q4_k_xl.gguf \
 #     -ngl 99 -c 8192 -fa on -np 1 \

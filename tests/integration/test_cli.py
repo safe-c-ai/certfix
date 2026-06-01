@@ -608,7 +608,7 @@ free(p);
             result = runner.invoke(main, ["fix", str(c_file)])
 
         assert result.exit_code == 0
-        assert "No violations found" in result.output
+        assert "No fix candidates generated" in result.output
 
     def test_fix_simple_code_only_profile_detects_rule_when_not_provided(
         self,

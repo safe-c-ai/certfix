@@ -544,7 +544,7 @@ def _run_simple_fix_command(
         if not quiet and output_format == "text":
             stderr.print(f"Fix reports written to {artifacts_dir / 'reports'}")
         if not quiet:
-            stderr.print("[green]No violations found.[/green]")
+            stderr.print("[green]No fix candidates generated.[/green]")
         sys.exit(0)
 
     _write_fix_artifacts(fixes, path, artifacts_dir)
