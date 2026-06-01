@@ -158,8 +158,7 @@ Docker users can run the API-only image with the current directory mounted as
 `/workspace`. API routes send source code to the configured provider.
 
 ```bash
-docker build -t certfix:api .
-docker run --rm -e OPENROUTER_API_KEY -v "$PWD":/workspace certfix:api --help
+docker run --rm -e OPENROUTER_API_KEY -v "$PWD":/workspace ghcr.io/safe-c-ai/certfix:edge --help
 ```
 
 See [docs/DOCKER.md](docs/DOCKER.md) for Docker and Docker Compose examples.

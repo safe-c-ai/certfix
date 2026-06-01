@@ -7,7 +7,17 @@ a local Python environment and C compiler. This path does not include
 API profiles send source code to the configured provider. Confirm your project
 data policy before using OpenRouter, DeepSeek, or another cloud provider.
 
-## Build The Image
+## Use The Published Image
+
+The `edge` image follows the public `main` branch. Tagged release images are
+published as `ghcr.io/safe-c-ai/certfix:<version>` when a release tag is pushed.
+
+```bash
+docker pull ghcr.io/safe-c-ai/certfix:edge
+docker run --rm ghcr.io/safe-c-ai/certfix:edge --help
+```
+
+## Build The Image Locally
 
 From a certfix repository checkout:
 
@@ -26,19 +36,19 @@ export OPENROUTER_API_KEY=<openrouter-key>
 docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD":/workspace \
-  certfix:api \
+  ghcr.io/safe-c-ai/certfix:edge \
   config deepseek-v4-flash-openrouter --output .certfix.yaml --force
 
 docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD":/workspace \
-  certfix:api \
+  ghcr.io/safe-c-ai/certfix:edge \
   check . --output-dir certfix-output
 
 docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD":/workspace \
-  certfix:api \
+  ghcr.io/safe-c-ai/certfix:edge \
   fix . --output-dir certfix-output
 ```
 
