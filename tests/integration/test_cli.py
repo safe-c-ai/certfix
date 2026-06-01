@@ -766,7 +766,8 @@ free(p);
         )
 
         assert result.exit_code == 2
-        assert "No such option: --interactive" in result.output
+        assert "No such option" in result.output
+        assert "--interactive" in result.output
 
 
 def _make_setup_config(tmp_path: Path) -> Config:
