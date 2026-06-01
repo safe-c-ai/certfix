@@ -1,5 +1,40 @@
 # certfix Release Notes
 
+## certfix 0.2.0
+
+Minor release focused on lowering local Qwen3.6 setup friction with Docker
+Compose while keeping certfix's runtime boundary explicit.
+
+### Changes
+
+- Added the bundled `qwen36-mtp-docker` profile for Docker Compose local Qwen3.6
+  runs. The profile points certfix at `http://llama-server:8952/v1`, the service
+  hostname used inside the Compose network.
+- Added `docker-compose.local-qwen36.yml` with separate `llama-server` and
+  certfix services.
+- Expanded `docs/DOCKER.md` with separate API-only Docker and Local Qwen3.6
+  Docker Compose flows.
+- Documented the remaining local Compose requirements: NVIDIA driver, NVIDIA
+  Container Toolkit, GPU/VRAM capacity, model cache, and an MTP-capable
+  `llama-server` image supplied through `LLAMA_SERVER_IMAGE`.
+- Added release-readiness and integration-test coverage for
+  `qwen36-mtp-docker` config loading, listing, and profile generation.
+
+### Compatibility
+
+- The standard install remains:
+
+```bash
+pip install certfix
+```
+
+- The API-only Docker image remains the easiest Docker path for users who can
+  send source code to a configured provider.
+- The local Qwen3.6 route still requires an external MTP-capable
+  `llama-server`; certfix does not publish or bundle that server image yet.
+- Source files are still not modified. Generated reports, fixed-code
+  candidates, and patches are written as artifacts for manual review.
+
 ## certfix 0.1.1
 
 Patch release focused on release polish and validation guardrail coverage.

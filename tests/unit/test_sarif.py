@@ -105,7 +105,7 @@ class TestSarifSchema:
         sarif = _format_violations([])
         driver = sarif["runs"][0]["tool"]["driver"]
         assert driver["name"] == "certfix"
-        assert driver["version"] == "0.1.1"
+        assert driver["version"] == "0.2.0"
         assert "certfix" in driver["informationUri"]
 
 

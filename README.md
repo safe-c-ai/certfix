@@ -13,7 +13,7 @@ fixed-code candidates for C source code with LLMs.
 - Write AI-generated fixed-code candidates and patches
 - Run the standard local path with Qwen3.6 MTP through `llama-server`
 - Use local servers and cloud APIs through OpenAI-compatible API backends
-  - v0.1.1 ships profiles for local `llama-server` with Qwen3.6-27B,
+  - v0.2.0 ships profiles for local `llama-server` with Qwen3.6-27B,
     OpenRouter with DeepSeek V4 Flash / Gemini 3 Flash Preview, and DeepSeek's
     official API with DeepSeek V4 Flash
 - Reduce risk with compile validation, violation-removal checks, and semantic
@@ -133,7 +133,7 @@ certfix doctor
 ```
 
 `certfix doctor` shows a warning and a server command example if the local
-server is not reachable. v0.1.1 does not auto-start `llama-server`.
+server is not reachable. v0.2.0 does not auto-start `llama-server`.
 
 ## Quick Start
 
@@ -470,7 +470,7 @@ exit codes for CI violation gating.
   best-effort token/context tuning.
 - Header handling is limited. System headers and deep include graphs are not
   fully expanded.
-- v0.1.1 fixed-code candidates are comment-stripped; comment-preserving repair
+- v0.2.0 fixed-code candidates are comment-stripped; comment-preserving repair
   is not implemented.
 - LLM output is not deterministic. The exact issue candidates, fixed-code
   candidates, and explanation text can vary by model, provider, prompt profile,

@@ -1,11 +1,11 @@
 # Qwen3.6 MTP Runtime
 
 This document describes the supported local LLM runtime path for certfix
-v0.1.1.
+v0.2.0.
 
 ## Supported Local Runtime
 
-The v0.1.1 local profile is Qwen3.6-27B MTP through an external
+The v0.2.0 local profile is Qwen3.6-27B MTP through an external
 OpenAI-compatible llama.cpp `llama-server`.
 
 Use:
@@ -155,4 +155,4 @@ result.
   Qwen3.6 MTP GGUF family used by the release-default profile.
 - If a server fails to load an MTP GGUF with a missing-tensor error such as
   `blk.64.ssm_conv1d.weight`, treat that as an incompatible runtime first.
-- Non-MTP `llama-server` execution is not the verified v0.1.1 local profile.
+- Non-MTP `llama-server` execution is not the verified v0.2.0 local profile.

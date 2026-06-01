@@ -1,6 +1,6 @@
 # certfix Documentation Index
 
-This index lists the public documentation for the certfix v0.1.1 release.
+This index lists the public documentation for the certfix v0.2.0 release.
 Start with the root [README.md](../README.md) for installation, quick start,
 commands, model profiles, limitations, and license information.
 
