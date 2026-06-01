@@ -53,6 +53,10 @@ explicit binary path.
 
 ## Quick Start
 
+The sample commands below assume a cloned certfix repository checkout where
+`examples/input/` exists. If you installed certfix from PyPI only, use your own
+`.c` file or clone the repository examples.
+
 ```bash
 llama-server \
   -hf unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL \

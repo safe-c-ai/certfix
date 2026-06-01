@@ -67,7 +67,7 @@ def check(
     quiet: bool,
     verbose: bool,
 ) -> None:
-    """Check for CERT-C violations in C source files."""
+    """Check for CERT-C violation candidates in C source files."""
     stderr = Console(stderr=True, quiet=quiet or output_format in ("json", "sarif"))
 
     try:
