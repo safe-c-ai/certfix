@@ -298,10 +298,7 @@ def check_env33_exec_argv_shift(
     fixed = strip_comments(fixed_code)
     if "system" not in original or not re.search(r"\bexec[lvpe]*\s*\(", fixed):
         return []
-    if re.search(
-        r"\bexecv?p?\s*\(\s*[A-Za-z_][A-Za-z0-9_]*\s*,\s*(?:\([^)]*\)\s*)?argv\s*\)",
-        fixed,
-    ):
+    if re.search(r"\bexecv?p?\s*\(\s*[^,]+\s*,\s*(?:\([^)]*\)\s*)?argv\s*\)", fixed):
         return [
             ProgrammaticFinding(
                 "env33_exec_argv_shift",
@@ -355,9 +352,13 @@ def check_mem36_copy_size_mismatch(
     memcpy_args = re.findall(r"\bmemcpy\s*\((.*?)\)\s*;", fixed, flags=re.DOTALL)
     findings: list[ProgrammaticFinding] = []
     for args in memcpy_args:
-        if "min" in args or re.search(r"new_\w+|newSize|new_size", args):
+        parts = args.split(",", 2)
+        if len(parts) != 3:
             continue
-        if re.search(r"\bold_\w+|oldSize|old_size|capacity|count|size", args):
+        copy_size = parts[2]
+        if "min" in copy_size or re.search(r"new_\w+|newSize|new_size", copy_size):
+            continue
+        if re.search(r"\bold_\w+|oldSize|old_size|capacity|count|size", copy_size):
             findings.append(
                 ProgrammaticFinding(
                     "mem36_unclamped_memcpy_after_aligned_alloc",
