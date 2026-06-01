@@ -210,6 +210,42 @@ certfix fix examples/input/ --output-dir examples/certfix-output
 
 ## Example Output
 
+Given this MEM30-C use-after-free example:
+
+```c
+int run_mem30_demo(void) {
+    char *p = make_message("primary", 7);
+    if (p == NULL) {
+        return -1;
+    }
+
+    free(p);
+    print_label(p);
+    return 0;
+}
+```
+
+`certfix check` reports a MEM30-C issue candidate. `certfix fix` may generate a
+fixed-code candidate like this:
+
+```c
+int run_mem30_demo(void) {
+    char *p = make_message("primary", 7);
+    if (p == NULL) {
+        return -1;
+    }
+
+    print_label(p);
+    free(p);
+    return 0;
+}
+```
+
+LLM output is not guaranteed to be deterministic, so exact fixed-code candidates
+can vary by model, provider, prompt profile, and runtime settings. Review the
+generated patch before applying it. See
+[docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) for a fuller walkthrough.
+
 For `certfix check`, the output directory contains machine-readable reports:
 
 ```text
@@ -418,6 +454,9 @@ exit codes for CI violation gating.
   fully expanded.
 - v0.1.1 fixed-code candidates are comment-stripped; comment-preserving repair
   is not implemented.
+- LLM output is not deterministic. The exact issue candidates, fixed-code
+  candidates, and explanation text can vary by model, provider, prompt profile,
+  runtime settings, and upstream model updates.
 - Source files are not modified. Review generated fixed-code candidates and
   patches, then merge changes manually.
 - Validation gates reduce risk but do not guarantee semantic preservation,
@@ -436,6 +475,7 @@ The main public documents are:
 |----------|---------|
 | [docs/INDEX.md](docs/INDEX.md) | Documentation index |
 | [docs/DOCKER.md](docs/DOCKER.md) | API-only Docker and Docker Compose usage |
+| [docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Config lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
 | [docs/SUPPORTED_RULES.md](docs/SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [docs/QWEN36_MTP_RUNTIME.md](docs/QWEN36_MTP_RUNTIME.md) | Local Qwen3.6 MTP `llama-server` setup and verified runtime notes |
