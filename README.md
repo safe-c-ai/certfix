@@ -154,6 +154,16 @@ comment-stripped fixed-code candidates under `fixes/` plus patches under
 
 No local GPU or `llama-server` is required.
 
+Docker users can run the API-only image with the current directory mounted as
+`/workspace`. API routes send source code to the configured provider.
+
+```bash
+docker build -t certfix:api .
+docker run --rm -e OPENROUTER_API_KEY -v "$PWD":/workspace certfix:api --help
+```
+
+See [docs/DOCKER.md](docs/DOCKER.md) for Docker and Docker Compose examples.
+
 OpenRouter with DeepSeek V4 Flash:
 
 ```bash
@@ -426,6 +436,7 @@ The main public documents are:
 | Document | Purpose |
 |----------|---------|
 | [docs/INDEX.md](docs/INDEX.md) | Documentation index |
+| [docs/DOCKER.md](docs/DOCKER.md) | API-only Docker and Docker Compose usage |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Config lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
 | [docs/SUPPORTED_RULES.md](docs/SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [docs/QWEN36_MTP_RUNTIME.md](docs/QWEN36_MTP_RUNTIME.md) | Local Qwen3.6 MTP `llama-server` setup and verified runtime notes |

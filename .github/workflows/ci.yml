@@ -61,3 +61,10 @@ jobs:
           /tmp/certfix-wheel-smoke/bin/certfix config --list
           /tmp/certfix-wheel-smoke/bin/certfix config qwen36-mtp-local --output /tmp/certfix-smoke.yaml
           test -s /tmp/certfix-smoke.yaml
+
+      - name: Smoke test Docker image
+        if: matrix.python-version == '3.10'
+        run: |
+          docker build -t certfix-ci .
+          docker run --rm certfix-ci --help
+          docker run --rm certfix-ci config --list

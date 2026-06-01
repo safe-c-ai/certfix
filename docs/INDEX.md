@@ -9,6 +9,7 @@ commands, model profiles, limitations, and license information.
 | Document | Purpose |
 | --- | --- |
 | [../README.md](../README.md) | User guide, quick start, commands, profiles, limitations, and license |
+| [DOCKER.md](DOCKER.md) | API-only Docker and Docker Compose usage |
 | [CONFIGURATION.md](CONFIGURATION.md) | `.certfix.yaml` lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
 | [SUPPORTED_RULES.md](SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [QWEN36_MTP_RUNTIME.md](QWEN36_MTP_RUNTIME.md) | Local Qwen3.6-27B MTP `llama-server` setup and runtime notes |
@@ -37,6 +38,7 @@ than normal CLI users.
 
 - Installation and requirements: [README.md](../README.md#installation-and-requirements)
 - Quick start: [README.md](../README.md#quick-start)
+- Docker usage: [DOCKER.md](DOCKER.md)
 - Commands: [README.md](../README.md#commands)
 - Model profiles: [README.md](../README.md#model-profiles)
 - Configuration details: [CONFIGURATION.md](CONFIGURATION.md)
