@@ -297,27 +297,13 @@ Use `certfix check` exit codes for CI violation gating.
 
 ## Limitations
 
-- C only. C++ is not supported.
-- Supported CERT-C coverage is limited to the 115 bundled rule targets.
-  CERT-C recommendations are not supported. See
-  [docs/SUPPORTED_RULES.md](docs/SUPPORTED_RULES.md).
-- Directory input scans `.c` / `.h` files. `certfix-output/` is skipped.
-- certfix does not detect every violation, and generated fixes are not always
-  correct.
-- Analysis is file/function scoped, not whole-program semantic analysis.
-- Repair assumes one violation per function. Multiple violations in one function
-  are not supported as a single repair task.
-- Functions up to about 200 lines are the expected case. Results may become less
-  stable above that, and functions over about 300 lines should be split before
-  running certfix.
-- Header handling is limited. System headers and deep include graphs are not
-  fully expanded.
-- v0.2.0 fixed-code candidates are comment-stripped; comment-preserving repair
-  is not implemented.
-- Validation gates reduce risk but do not guarantee semantic preservation,
-  security correctness, or compile success in your target build environment.
-- For release test set success rates and caveats, see
-  [docs/BENCHMARK_SUMMARY.md](docs/BENCHMARK_SUMMARY.md).
+certfix is C-only, function-scoped, and limited to the bundled CERT-C rule
+targets. Generated fixes are reviewable candidates, not guaranteed repairs.
+Validation gates reduce risk but do not prove semantic preservation or security
+correctness.
+
+See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for the full scope and runtime
+caveats.
 
 ## Documentation
 
@@ -328,6 +314,7 @@ Use `certfix check` exit codes for CI violation gating.
 | [docs/INSTALLATION.md](docs/INSTALLATION.md) | Manual installation, compiler setup, and direct runtime setup |
 | [docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Config lookup, bundled profiles, include paths, advanced routing, and token/context tuning |
+| [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Full scope, repair, validation, and runtime limitations |
 | [docs/SUPPORTED_RULES.md](docs/SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [docs/QWEN36_MTP_RUNTIME.md](docs/QWEN36_MTP_RUNTIME.md) | Local Qwen3.6 MTP `llama-server` setup and verified runtime notes |
 | [docs/BENCHMARK_SUMMARY.md](docs/BENCHMARK_SUMMARY.md) | v0.1.0 benchmark summary, release test set aggregate results, and caveats |

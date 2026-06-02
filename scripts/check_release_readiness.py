@@ -71,6 +71,7 @@ PUBLIC_SCAN_PATHS = [
     "docs/DOCKER.md",
     "docs/EXAMPLE_OUTPUT.md",
     "docs/INSTALLATION.md",
+    "docs/LIMITATIONS.md",
     "docs/QWEN36_MTP_RUNTIME.md",
     "docs/INDEX.md",
     "docs/RELEASE_CHECKLIST.md",

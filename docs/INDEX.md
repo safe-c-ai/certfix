@@ -13,6 +13,7 @@ quick start commands, model routes, limitations, and license information.
 | [INSTALLATION.md](INSTALLATION.md) | Manual installation, compiler setup, local `llama-server` setup, and non-Docker examples |
 | [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [CONFIGURATION.md](CONFIGURATION.md) | `.certfix.yaml` lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
+| [LIMITATIONS.md](LIMITATIONS.md) | Full scope, repair, validation, and runtime limitations |
 | [SUPPORTED_RULES.md](SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [QWEN36_MTP_RUNTIME.md](QWEN36_MTP_RUNTIME.md) | Local Qwen3.6-27B MTP `llama-server` setup and runtime notes |
 | [BENCHMARK_SUMMARY.md](BENCHMARK_SUMMARY.md) | v0.1.0 release test set results, API cost estimates, and benchmark caveats |
@@ -45,6 +46,7 @@ than normal CLI users.
 - Commands: [README.md](../README.md#what-is-certfix-docker)
 - Model routes: [README.md](../README.md#model-routes-and-configuration)
 - Configuration details: [CONFIGURATION.md](CONFIGURATION.md)
+- Limitations: [LIMITATIONS.md](LIMITATIONS.md)
 - Supported rule catalog: [SUPPORTED_RULES.md](SUPPORTED_RULES.md)
 - Local MTP runtime: [QWEN36_MTP_RUNTIME.md](QWEN36_MTP_RUNTIME.md)
 - Benchmark caveats: [BENCHMARK_SUMMARY.md](BENCHMARK_SUMMARY.md)
