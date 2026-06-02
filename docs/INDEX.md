@@ -16,7 +16,7 @@ started commands, model routes, limitations, and license information.
 | [LIMITATIONS.md](LIMITATIONS.md) | Full scope, repair, validation, and runtime limitations |
 | [SUPPORTED_RULES.md](SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [QWEN36_MTP_RUNTIME.md](QWEN36_MTP_RUNTIME.md) | Local Qwen3.6-27B MTP `llama-server` setup and runtime notes |
-| [BENCHMARK_SUMMARY.md](BENCHMARK_SUMMARY.md) | v0.1.0 release test set results, API cost estimates, and benchmark caveats |
+| [BENCHMARK_SUMMARY.md](BENCHMARK_SUMMARY.md) | release test set results, API cost estimates, and benchmark caveats |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Release-side architecture, check/fix pipelines, validation gates, and scope boundaries |
 | [RESEARCH_NOTES.md](RESEARCH_NOTES.md) | Boundary between public release docs and research/archive materials |
 | [../THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) | Notices for SARIF, CERT-C metadata, and evaluation dataset boundaries |

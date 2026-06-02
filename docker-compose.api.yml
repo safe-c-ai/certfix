@@ -1,6 +1,6 @@
 services:
   certfix:
-    image: "${CERTFIX_IMAGE:-ghcr.io/safe-c-ai/certfix:edge}"
+    image: "${CERTFIX_IMAGE:-ghcr.io/safe-c-ai/certfix:0.3.1}"
     working_dir: /input
     volumes:
       - "${SOURCE_DIR:-.}:/input:ro"

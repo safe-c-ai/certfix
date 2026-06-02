@@ -1,5 +1,29 @@
 # certfix Release Notes
 
+## certfix 0.3.1
+
+Patch release focused on Docker documentation reproducibility and release
+metadata polish.
+
+### Changes
+
+- Updated README and Docker documentation examples to use the numbered
+  `ghcr.io/safe-c-ai/certfix:0.3.1` release image tag for normal use instead of
+  the moving `edge` tag.
+- Clarified that `edge` follows the public `main` branch and should be used only
+  when intentionally testing the latest development image.
+- Restored the README limitation note that fixed-code candidates are currently
+  comment-stripped.
+- Adjusted benchmark documentation labels so the benchmark summary does not look
+  like stale user-facing runtime guidance.
+
+### Compatibility
+
+- No runtime dependency changes.
+- No CLI behavior changes.
+- `edge` remains published for development/testing, while numbered Docker image
+  tags remain the recommended user-facing route.
+
 ## certfix 0.3.0
 
 Minor release focused on Docker-first onboarding, Docker Compose usability, and

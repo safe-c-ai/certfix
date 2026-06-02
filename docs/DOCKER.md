@@ -31,14 +31,18 @@ OpenRouter, DeepSeek, or another cloud provider.
 
 ### 2.1 Image Tags
 
-The `edge` image follows the public `main` branch. Tagged release images are
-published as `ghcr.io/safe-c-ai/certfix:<version>` when a release tag is pushed.
+Use a numbered release tag for normal use. The `edge` image follows the public
+`main` branch and can change after each merge.
 
 ```bash
-docker pull ghcr.io/safe-c-ai/certfix:edge
-docker run --rm ghcr.io/safe-c-ai/certfix:edge --help
-docker run --rm ghcr.io/safe-c-ai/certfix:edge certfix-docker --help
+docker pull ghcr.io/safe-c-ai/certfix:0.3.1
+docker run --rm ghcr.io/safe-c-ai/certfix:0.3.1 --help
+docker run --rm ghcr.io/safe-c-ai/certfix:0.3.1 certfix-docker --help
 ```
+
+Tagged release images are published as `ghcr.io/safe-c-ai/certfix:<version>`
+when a release tag is pushed. Use `ghcr.io/safe-c-ai/certfix:edge` only when you
+intentionally want the latest public `main` branch image.
 
 ### 2.2 Input And Output Folders
 
@@ -89,7 +93,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:edge \
+  ghcr.io/safe-c-ai/certfix:0.3.1 \
   certfix-docker api-check
 ```
 
@@ -106,7 +110,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:edge \
+  ghcr.io/safe-c-ai/certfix:0.3.1 \
   certfix-docker api-fix
 ```
 
@@ -140,7 +144,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:edge \
+  ghcr.io/safe-c-ai/certfix:0.3.1 \
   certfix-docker api-fix --profile gemini-3-flash-preview-openrouter
 ```
 
@@ -312,7 +316,7 @@ Required for all Compose routes:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `CERTFIX_IMAGE` | `ghcr.io/safe-c-ai/certfix:edge` | certfix CLI image |
+| `CERTFIX_IMAGE` | `ghcr.io/safe-c-ai/certfix:0.3.1` | certfix CLI image |
 | `SOURCE_DIR` | `.` | Host source path mounted read-only at `/input` |
 | `OUTPUT_DIR` | `./certfix-output` | Host output path mounted at `/output` |
 

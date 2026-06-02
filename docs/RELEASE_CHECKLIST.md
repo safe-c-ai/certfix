@@ -101,7 +101,7 @@ log. Wheel install-equivalent config list/write/doctor/check also passed.
 - [ ] `THIRD_PARTY_NOTICES.md` is present and references SARIF and CERT-C rule
   metadata boundaries.
 - [ ] Wheel users can read third-party notices:
-  `unzip -l dist/certfix-0.3.0-py3-none-any.whl | grep THIRD_PARTY_NOTICES`
+  `unzip -l dist/certfix-0.3.1-py3-none-any.whl | grep THIRD_PARTY_NOTICES`
 - [ ] Third-party evaluation sample files such as Juliet or PrimeVul-derived
   `*samples.jsonl.gz` files are not bundled in the initial public repository.
 - [ ] `eval-splits/` is not bundled in the initial public repository or sdist.

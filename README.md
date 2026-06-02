@@ -75,7 +75,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:edge \
+  ghcr.io/safe-c-ai/certfix:0.3.1 \
   certfix-docker api-check
 ```
 
@@ -91,7 +91,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:edge \
+  ghcr.io/safe-c-ai/certfix:0.3.1 \
   certfix-docker api-fix
 ```
 
@@ -105,7 +105,7 @@ docker run --rm `
   -e OPENROUTER_API_KEY `
   -v "$($PWD.Path)\src:/input:ro" `
   -v "$($PWD.Path)\certfix-output:/output" `
-  ghcr.io/safe-c-ai/certfix:edge `
+  ghcr.io/safe-c-ai/certfix:0.3.1 `
   certfix-docker api-check
 ```
 
@@ -314,6 +314,7 @@ Use `certfix check` exit codes for CI violation gating.
 - CERT-C recommendations are not supported.
 - Analysis is file/function scoped, not whole-program semantic analysis.
 - Generated fixes are candidates for review, not guaranteed correct patches.
+- Fixed-code candidates are currently comment-stripped.
 - API-only and hybrid modes may send source code to configured providers.
 
 See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for the full scope and runtime
@@ -331,7 +332,7 @@ caveats.
 | [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Full scope, repair, validation, and runtime limitations |
 | [docs/SUPPORTED_RULES.md](docs/SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [docs/QWEN36_MTP_RUNTIME.md](docs/QWEN36_MTP_RUNTIME.md) | Local Qwen3.6 MTP `llama-server` setup and verified runtime notes |
-| [docs/BENCHMARK_SUMMARY.md](docs/BENCHMARK_SUMMARY.md) | v0.1.0 benchmark summary, release test set aggregate results, and caveats |
+| [docs/BENCHMARK_SUMMARY.md](docs/BENCHMARK_SUMMARY.md) | benchmark summary, release test set aggregate results, and caveats |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Release-side architecture and pipeline design |
 | [docs/RESEARCH_NOTES.md](docs/RESEARCH_NOTES.md) | Boundary between public release docs and research/archive materials |
 | [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | SARIF, CERT-C metadata, and dataset boundary notices |
