@@ -1,6 +1,6 @@
 # Supported CERT-C Rule Catalog
 
-certfix v0.1.0 uses a bundled compact catalog of 115 CERT-C rule targets for
+certfix uses a bundled compact catalog of 115 CERT-C rule targets for
 detection, rule selection, repair prompts, validation prompts, and CLI output.
 
 The catalog is not a copy of the CERT-C standard. It contains compact rule
@@ -66,7 +66,7 @@ This list publishes only rule identifiers, not CERT-C rule text.
 
 - Supported CERT-C coverage is limited to the 115 bundled rule targets.
   CERT-C recommendations are not supported.
-- The catalog defines certfix's public v0.1.0 rule target set; it does not
+- The catalog defines certfix's public rule target set; it does not
   guarantee that every violation of those rules will be detected or fixed.
 - Rule titles and examples are compact prompt/output metadata, not a substitute
   for the official CERT-C rule text.

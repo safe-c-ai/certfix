@@ -2,6 +2,9 @@
 
 This page summarizes the public v0.1.0 benchmark posture and release test set
 results that are safe to publish without bundling the evaluation datasets.
+These results are retained as a v0.1.0 release-test reference. The current
+README is Docker-first for user onboarding, and runtime defaults or recommended
+first-run paths may differ from this benchmark posture.
 
 ## v0.1.0 Default
 

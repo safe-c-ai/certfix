@@ -15,6 +15,7 @@ from certfix.models import (
     SemanticAutoApplyResult,
     Severity,
     Violation,
+    ViolationRemovalResult,
 )
 
 _PATCH_DET_FACTORY = "certfix.inference.factory.create_detection_backend"
@@ -46,7 +47,7 @@ class TestCLI:
         result = runner.invoke(main, ["--version"])
 
         assert result.exit_code == 0
-        assert "0.2.0" in result.output
+        assert "0.3.0" in result.output
 
     def test_help(self) -> None:
         """Test --help option."""
@@ -390,7 +391,7 @@ class TestDoctorCommand:
         assert result.exit_code == 0
         assert "Python:" in result.output
         assert "certfix:" in result.output
-        assert "0.2.0" in result.output
+        assert "0.3.0" in result.output
 
     def test_doctor_omits_removed_llama_cpp_status(self) -> None:
         """Doctor should not advertise the removed in-process llama.cpp backend."""
@@ -486,12 +487,16 @@ class TestPublicConfigFiles:
             "configs/deepseek-v4-flash-api.yaml",
             "configs/gemini-3-flash-preview-openrouter.yaml",
             "configs/examples/local-detection-deepseek-fix.yaml",
+            "configs/examples/local-detection-deepseek-fix-docker.yaml",
             "configs/examples/deepseek-gemini-step-overrides.yaml",
         ]
 
         for config_path in public_configs:
             cfg = Config.load(Path(config_path))
             assert cfg.detection.backend
+            detector_role = cfg.validation.violation_removal.detector_role
+            if cfg.validation.violation_removal.enabled:
+                assert detector_role in cfg.models
 
     def test_config_command_lists_bundled_profiles(self) -> None:
         """`certfix config --list` should show bundled public profiles."""
@@ -502,6 +507,7 @@ class TestPublicConfigFiles:
         assert "qwen36-mtp-local" in result.output
         assert "qwen36-mtp-docker" in result.output
         assert "deepseek-v4-flash-api" in result.output
+        assert "local-detection-deepseek-fix-docker" in result.output
 
     def test_config_command_writes_bundled_profile(self, tmp_path: Path) -> None:
         """Bundled public profiles should be writable and parseable."""
@@ -533,6 +539,23 @@ class TestPublicConfigFiles:
         cfg = Config.load(output)
         assert cfg.detection.api.base_url == "http://llama-server:8952/v1"
         assert cfg.models["qwen36_local"].api.base_url == "http://llama-server:8952/v1"
+
+    def test_config_command_writes_docker_hybrid_profile(self, tmp_path: Path) -> None:
+        """Docker hybrid profile should use Compose local detection and API validation."""
+        output = tmp_path / ".certfix.yaml"
+
+        runner = CliRunner()
+        result = runner.invoke(
+            main,
+            ["config", "local-detection-deepseek-fix-docker", "--output", str(output)],
+        )
+
+        assert result.exit_code == 0
+        cfg = Config.load(output)
+        assert cfg.detection.api.base_url == "http://llama-server:8952/v1"
+        assert cfg.fix.simple_repairer_role == "deepseek_v4_flash"
+        assert cfg.validation.semantic.reviewer_role == "deepseek_v4_flash"
+        assert cfg.validation.violation_removal.detector_role == "deepseek_v4_flash"
 
     def test_config_command_refuses_overwrite_without_force(self, tmp_path: Path) -> None:
         """Existing output files should not be overwritten unless --force is set."""
@@ -574,9 +597,16 @@ free(p);
             patch(_PATCH_CONFIG_LOAD, return_value=cfg),
             patch(_PATCH_ROLE_BACKEND_FACTORY, return_value=backend),
             patch("certfix.core.validation.run_compile_check") as mock_compile,
+            patch("certfix.core.validation.run_violation_removal_check") as mock_removal,
             patch("certfix.core.validation.run_semantic_auto_apply_check") as mock_semantic,
         ):
             mock_compile.return_value = CompileCheckResult(True, ["gcc"], 0)
+            mock_removal.return_value = ViolationRemovalResult(
+                removed=True,
+                target_rule_id="MEM30-C",
+                remaining_violations=[],
+                method="non_target_advisory",
+            )
             mock_semantic.return_value = SemanticAutoApplyResult(
                 parse_ok=True,
                 auto_apply_ok=True,
@@ -607,6 +637,8 @@ free(p);
             'char *p = malloc(10);\nfree(p);\nprintf("%s", p);\n'
         )
         mock_compile.assert_called_once()
+        mock_removal.assert_called_once()
+        assert mock_removal.call_args.args[2] is backend
         mock_semantic.assert_called_once()
 
     def test_fix_simple_mode_no_violations(self, tmp_path: Path) -> None:
@@ -740,12 +772,19 @@ free(p);
             patch(_PATCH_CONFIG_LOAD, return_value=cfg),
             patch(_PATCH_ROLE_BACKEND_FACTORY, return_value=backend),
             patch("certfix.core.validation.run_compile_check") as mock_compile,
+            patch("certfix.core.validation.run_violation_removal_check") as mock_removal,
             patch("certfix.core.validation.run_semantic_auto_apply_check") as mock_semantic,
         ):
             mock_compile.side_effect = [
                 CompileCheckResult(False, ["gcc"], 1, stderr="expected ';'"),
                 CompileCheckResult(True, ["gcc"], 0),
             ]
+            mock_removal.return_value = ViolationRemovalResult(
+                removed=True,
+                target_rule_id="MEM30-C",
+                remaining_violations=[],
+                method="non_target_advisory",
+            )
             mock_semantic.return_value = SemanticAutoApplyResult(
                 parse_ok=True,
                 auto_apply_ok=True,
@@ -772,7 +811,7 @@ free(p);
         assert backend.generate.call_count == 2
 
     def test_fix_rejects_removed_interactive_option(self, tmp_path: Path) -> None:
-        """--interactive is not part of the v0.1.0 public fix path."""
+        """--interactive is not part of the current public fix path."""
         c_file = tmp_path / "vuln.c"
         c_file.write_text('char *p = malloc(10);\nfree(p);\nprintf("%s", p);\n')
 

@@ -70,6 +70,7 @@ validation:
     timeout: 30
   violation_removal:
     enabled: true
+    detector_role: deepseek_v4_flash
     method: non_target_advisory
     max_tokens: 512
     override_denylist: ["SIG34-C", "STR31-C"]

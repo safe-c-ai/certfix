@@ -36,6 +36,7 @@ PUBLIC_CONFIGS = [
     "configs/deepseek-v4-flash-api.yaml",
     "configs/gemini-3-flash-preview-openrouter.yaml",
     "configs/examples/local-detection-deepseek-fix.yaml",
+    "configs/examples/local-detection-deepseek-fix-docker.yaml",
     "configs/examples/deepseek-gemini-step-overrides.yaml",
 ]
 
@@ -59,6 +60,7 @@ PUBLIC_SCAN_PATHS = [
     "configs/deepseek-v4-flash-api.yaml",
     "configs/gemini-3-flash-preview-openrouter.yaml",
     "configs/examples/local-detection-deepseek-fix.yaml",
+    "configs/examples/local-detection-deepseek-fix-docker.yaml",
     "configs/examples/deepseek-gemini-step-overrides.yaml",
     "docker",
     "docker-compose.api.yml",
@@ -186,6 +188,7 @@ def check_bundled_config_profiles() -> list[CheckResult]:
         "deepseek-v4-flash-api",
         "gemini-3-flash-preview-openrouter",
         "local-detection-deepseek-fix",
+        "local-detection-deepseek-fix-docker",
         "deepseek-gemini-step-overrides",
     }
     actual_names = set(CONFIG_PROFILES)
@@ -235,6 +238,7 @@ def check_config_cli_list() -> CheckResult:
         "deepseek-v4-flash-api",
         "gemini-3-flash-preview-openrouter",
         "local-detection-deepseek-fix",
+        "local-detection-deepseek-fix-docker",
         "deepseek-gemini-step-overrides",
     }
     env = dict(os.environ)

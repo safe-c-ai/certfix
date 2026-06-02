@@ -286,6 +286,7 @@ CONFIG_PROFILES: dict[str, str] = {
     "deepseek-v4-flash-api": "deepseek-v4-flash-api.yaml",
     "gemini-3-flash-preview-openrouter": "gemini-3-flash-preview-openrouter.yaml",
     "local-detection-deepseek-fix": "examples/local-detection-deepseek-fix.yaml",
+    "local-detection-deepseek-fix-docker": "examples/local-detection-deepseek-fix-docker.yaml",
     "deepseek-gemini-step-overrides": "examples/deepseek-gemini-step-overrides.yaml",
 }
 
@@ -426,14 +427,17 @@ def _run_simple_fix_command(
         timeout=timeout,
     )
     post_fix_detection_backend = (
-        _create_available_step_backend(
+        _reuse_or_create_step_backend(
             cfg,
-            "post_fix_detection",
-            cfg.step_role("post_fix_detection"),
-            threads,
-            timeout,
+            step="post_fix_detection",
+            default_role_name=cfg.validation.violation_removal.detector_role,
+            primary_role_name=role_name,
+            primary_backend=backend,
+            threads=threads,
+            timeout=timeout,
         )
-        or None
+        if cfg.validation.violation_removal.enabled
+        else None
     )
     retry_semantic_role_name = cfg.step_role("retry_semantic_check", semantic_role_name)
     retry_semantic_backend = _reuse_or_create_step_backend(
@@ -455,14 +459,17 @@ def _run_simple_fix_command(
         timeout=timeout,
     )
     retry_post_fix_detection_backend = (
-        _create_available_step_backend(
+        _reuse_or_create_step_backend(
             cfg,
-            "retry_post_fix_detection",
-            cfg.step_role("retry_post_fix_detection"),
-            threads,
-            timeout,
+            step="retry_post_fix_detection",
+            default_role_name=cfg.validation.violation_removal.detector_role,
+            primary_role_name=role_name,
+            primary_backend=backend,
+            threads=threads,
+            timeout=timeout,
         )
-        or post_fix_detection_backend
+        if cfg.validation.violation_removal.enabled
+        else None
     )
     try:
         for target in files:

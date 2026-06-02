@@ -27,3 +27,11 @@ detection:
 
 check:
   exclude: []
+
+validation:
+  compile:
+    enabled: false
+  violation_removal:
+    enabled: false
+  semantic:
+    enabled: false

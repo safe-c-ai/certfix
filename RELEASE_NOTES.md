@@ -1,5 +1,46 @@
 # certfix Release Notes
 
+## certfix 0.3.0
+
+Minor release focused on Docker-first onboarding, Docker Compose usability, and
+clearer local-model runtime boundaries.
+
+### Changes
+
+- Reworked `README.md` around Docker-first Getting Started with API-only,
+  local-only, and hybrid routes.
+- Reorganized `docs/DOCKER.md` into route-based API-only, local `llama-server`,
+  and hybrid Compose instructions, with reference tables and troubleshooting
+  moved out of the main path.
+- Changed Docker Compose defaults from fix-first to check-first:
+  `docker-compose.api.yml` now defaults to `api-check`, and
+  `docker-compose.local-qwen36.yml` now defaults to `local-check`.
+- Updated local-only and hybrid README examples to mount an existing GGUF model
+  directory explicitly with `HOST_MODEL_DIR` and `LLAMA_MODEL_PATH`.
+- Documented Qwen3.6-27B MTP GPU/VRAM expectations in the Docker path.
+- Clarified that the bundled detection route is verified with Qwen3.6-27B MTP,
+  while repair/validation routing to other models is an advanced configuration
+  path.
+- Added `local-detection-deepseek-fix-docker` for Docker Compose hybrid routing
+  with local Qwen3.6 detection and API-routed repair/validation.
+- Clarified that `examples/input/` is available from a repository checkout, not
+  from a PyPI install or a pulled Docker image alone.
+
+### Compatibility
+
+- The standard install remains:
+
+```bash
+pip install certfix
+```
+
+- Source files are still mounted/read as inputs and are not modified by
+  certfix.
+- API-only and hybrid routes still send source code to the configured provider
+  for API-routed steps.
+- The bundled local detection route remains Qwen3.6-27B MTP through an external
+  MTP-capable `llama-server`.
+
 ## certfix 0.2.0
 
 Minor release focused on lowering local Qwen3.6 setup friction with Docker
@@ -10,10 +51,12 @@ Compose while keeping certfix's runtime boundary explicit.
 - Added the bundled `qwen36-mtp-docker` profile for Docker Compose local Qwen3.6
   runs. The profile points certfix at `http://llama-server:8952/v1`, the service
   hostname used inside the Compose network.
+- Added `local-detection-deepseek-fix-docker` for Docker Compose hybrid routing
+  with local Qwen3.6 detection and DeepSeek repair/validation.
 - Added `docker-compose.local-qwen36.yml` with separate `llama-server` and
   certfix services.
 - Expanded `docs/DOCKER.md` with separate API-only Docker and Local Qwen3.6
-  Docker Compose flows.
+  Docker Compose flows, plus the hybrid Compose route.
 - Documented the remaining local Compose requirements: NVIDIA driver, NVIDIA
   Container Toolkit, GPU/VRAM capacity, model cache, and an MTP-capable
   `llama-server` image supplied through `LLAMA_SERVER_IMAGE`.

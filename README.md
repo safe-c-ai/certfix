@@ -6,50 +6,64 @@ certfix detects CERT-C issue candidates in C code and generates reviewable
 fixed-code candidates and patches with LLMs.
 
 certfix complements static analyzers by producing repair candidates, not just
-diagnostics. It can run through cloud APIs for a quick first trial, or through a
-local Qwen3.6 `llama-server` route when source code must stay local.
+diagnostics. Docker is the recommended runtime for normal use. Non-Docker
+installation and direct `llama-server` operation are available for advanced or
+manual use in [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
-## Run With Docker
+## 1. Getting Started
 
-Docker is the recommended way to try certfix.
-
-- No local Python setup is required.
-- No local compiler setup is required.
-- Your source folder is mounted read-only at `/input`.
-- Reports, fixed-code candidates, and patches are written to `/output`.
-- Source files are not modified.
-
-The Docker-first path is:
+certfix uses the same input/output model across API-only, local-only, and hybrid
+runtime paths:
 
 ```text
 source folder -> /input:ro -> certfix container -> /output
 ```
 
-## Choose A Runtime
+Source files are mounted read-only and are not modified. Reports, fixed-code
+candidates, and patches are written to the output folder.
 
-| Use case | Path | Sends source code to API? | Difficulty |
-| --- | --- | --- | --- |
-| Try certfix quickly | Docker + API check | Yes | Easy |
-| Generate fix candidates quickly | Docker + API fix | Yes | Easy |
-| Keep source code local | Docker Compose + local Qwen3.6 | No | Advanced |
-| Develop certfix itself | pip/source install | Depends on profile | Advanced |
+### 1.1 Prepare Folders
 
-API mode sends source code to the configured provider. Confirm your project
-data policy before using a cloud provider.
-
-Local LLM mode keeps inference local, but still requires a GPU-capable Docker
-host, NVIDIA Container Toolkit, an MTP-capable `llama-server` image, and a
-Qwen3.6 GGUF model or model download access.
-
-## Quick Start: Check With API
-
-Prepare a source folder and an output folder:
+Create or choose a folder containing the C source files to scan, then create an
+output folder:
 
 ```text
 my-project/
 +-- src/             # scan this folder first
 `-- certfix-output/  # generated reports, fixes, and patches
 ```
+
+If your C files are not under `src/`, replace `$PWD/src` in the commands below
+with the folder you want to scan. You can mount the project root with
+`$PWD:/input:ro`, but using a smaller source folder is recommended for the first
+run.
+
+When using the published certfix image with `docker run`, you do not need to
+copy files from this repository. For Docker Compose, copy the compose file and
+any supporting `llama-server` build files required for the route you are
+testing; see [docs/DOCKER.md](docs/DOCKER.md).
+
+### 1.2 Choose A Runtime
+
+| Option | Use when | Sends source code to API? | Requirements | Start here |
+| --- | --- | --- | --- | --- |
+| A. API-Only | Fastest first run; source can be sent to a provider | Yes | Docker, API key | `certfix-docker api-check` |
+| B. Local-Only | Source code must stay local | No | Docker Compose, NVIDIA GPU, MTP-capable `llama-server`, compatible GGUF model | `certfix-docker local-check` |
+| C. Hybrid | Local detection with API repair/validation | Yes, for API-routed steps | Local-only requirements plus API key | `certfix-docker local-fix --profile local-detection-deepseek-fix-docker` |
+
+`certfix-docker` is the Docker helper used in the commands below; see
+[3.1 certfix-docker](#31-certfix-docker) for details.
+
+API-only and hybrid modes send source code to the configured provider for the
+API-routed steps. Confirm your project data policy before using either mode.
+
+Local-only mode does not send source code to an API provider. You still need to
+provide or download the model separately.
+
+#### Option A: API-Only Mode
+
+Use API-only mode when you want the easiest first run and your source can be
+sent to the configured provider.
 
 Run `api-check` first. It writes reports and does not generate fix files.
 
@@ -65,25 +79,9 @@ docker run --rm \
   certfix-docker api-check
 ```
 
-If your C files are not under `src/`, replace `$PWD/src` with the folder you
-want to scan. You can mount the project root with `$PWD:/input:ro`, but using a
-smaller source folder is recommended for the first run.
-
-### Windows PowerShell
-
-```powershell
-$env:OPENROUTER_API_KEY="<openrouter-key>"
-New-Item -ItemType Directory -Force certfix-output
-
-docker run --rm `
-  -e OPENROUTER_API_KEY `
-  -v "${PWD}\src:/input:ro" `
-  -v "${PWD}\certfix-output:/output" `
-  ghcr.io/safe-c-ai/certfix:edge `
-  certfix-docker api-check
-```
-
-## Generate Fix Candidates
+`certfix check` returns exit code 1 when it finds issue candidates. That means
+the command completed and reported findings; exit code 2 indicates usage,
+configuration, model, or runtime errors.
 
 After checking the project, run `api-fix` to generate reviewable fixed-code
 files and patches:
@@ -97,78 +95,91 @@ docker run --rm \
   certfix-docker api-fix
 ```
 
-Review generated files under:
+PowerShell example:
 
-```text
-certfix-output/
-+-- reports/
-+-- fixes/
-`-- patches/
+```powershell
+$env:OPENROUTER_API_KEY="<openrouter-key>"
+New-Item -ItemType Directory -Force certfix-output
+
+docker run --rm `
+  -e OPENROUTER_API_KEY `
+  -v "$($PWD.Path)\src:/input:ro" `
+  -v "$($PWD.Path)\certfix-output:/output" `
+  ghcr.io/safe-c-ai/certfix:edge `
+  certfix-docker api-check
 ```
 
-Generated code and patches are for manual review. Apply patches only after
-reviewing them.
+#### Option B: Local-Only Mode
 
-## What Is `certfix-docker`?
-
-`certfix-docker` is a container helper. It generates a temporary config inside
-the container, runs `certfix doctor`, then runs `certfix check` or
-`certfix check` followed by `certfix fix`.
-
-| Command | Default profile | Flow |
-| --- | --- | --- |
-| `certfix-docker api-check` | `deepseek-v4-flash-openrouter` | config, doctor, check |
-| `certfix-docker api-fix` | `deepseek-v4-flash-openrouter` | config, doctor, check, fix |
-| `certfix-docker local-check` | `qwen36-mtp-docker` | config, doctor, check |
-| `certfix-docker local-fix` | `qwen36-mtp-docker` | config, doctor, check, fix |
-
-Use a different bundled profile with `--profile`.
-
-## What To Copy For A Separate Test Folder
-
-When using the published certfix image with `docker run`, you do not need to
-copy files from this repository. Put the C source files you want to scan in a
-folder, create an output folder, and mount them as `/input` and `/output`.
-
-```text
-my-test/
-+-- source/          # your .c / .h files
-`-- certfix-output/  # generated reports, fixes, and patches
-```
-
-If you want to use Docker Compose instead of `docker run`, copy only the Compose
-file for the route you are testing:
-
-- API-only Compose: `docker-compose.api.yml`
-- Local Qwen3.6 Compose with a self-built `llama-server` image:
-  `docker-compose.local-qwen36.yml`, `docker/llama-server/Dockerfile`, and
-  `docker/llama-server/entrypoint.sh`
-
-You need a full certfix repository checkout only when building the certfix image
-itself locally.
-
-## Use A Local LLM
-
-Use local LLM mode when source code must not be sent to an external provider.
+Use local-only mode when source code must not be sent to an external provider.
 This is an advanced path because the certfix image does not include
-`llama-server`, model weights, or a GPU runtime.
+`llama-server`, model weights, or a GPU runtime. The bundled Qwen3.6-27B MTP
+default requires a large GPU; see [docs/DOCKER.md](docs/DOCKER.md) for runtime
+requirements.
 
-With Docker Compose, certfix uses the `qwen36-mtp-docker` profile and talks to
-the Compose service URL `http://llama-server:8952/v1`.
+The bundled `qwen36-mtp-docker` profile targets Qwen3.6-27B MTP by default.
+The Compose route can use another compatible local model if you provide a
+matching certfix config/profile and `llama-server` model settings.
 
 ```bash
 export LLAMA_SERVER_IMAGE=<mtp-capable-llama-server-image>
 export SOURCE_DIR="$PWD/src"
 export OUTPUT_DIR="$PWD/certfix-output"
+export HOST_MODEL_DIR=/path/to/models
+export LLAMA_MODEL_PATH=/models/qwen3.6-27b-mtp-ud-q4_k_xl.gguf
 
 docker compose -f docker-compose.local-qwen36.yml up -d llama-server
 docker compose -f docker-compose.local-qwen36.yml run --rm certfix certfix-docker local-check
 ```
 
-For the full local Qwen3.6 Compose flow, model/cache mounts, and host GPU
+If `LLAMA_MODEL_PATH` is not set, the compose file falls back to
+`LLAMA_GGUF_REPO` and lets `llama-server` download/cache the configured GGUF.
+Replace `LLAMA_MODEL_PATH` with the GGUF file you mounted under `/models`.
+The bundled detection route is verified with Qwen3.6-27B MTP. Routing
+repair/validation to another model is configured in
+[docs/CONFIGURATION.md](docs/CONFIGURATION.md); non-MTP local runtimes require
+runtime overrides described in
+[docs/QWEN36_MTP_RUNTIME.md](docs/QWEN36_MTP_RUNTIME.md).
+
+Run `local-fix` after checking when you want fixed-code candidates and patches:
+
+```bash
+docker compose -f docker-compose.local-qwen36.yml run --rm certfix certfix-docker local-fix
+```
+
+For the full local `llama-server` Compose flow, model/cache mounts, and host GPU
 requirements, see [docs/DOCKER.md](docs/DOCKER.md).
 
-## Example Output
+#### Option C: Hybrid Mode
+
+Hybrid mode is an advanced route. It uses the same Compose setup as
+Local-Only Mode, but switches to a hybrid profile and passes an API key.
+
+The bundled `local-detection-deepseek-fix-docker` profile uses the default local
+Qwen3.6 detection route and an API provider for repair/validation. Source code
+may be sent to the configured provider for those API-routed steps.
+
+```bash
+export LLAMA_SERVER_IMAGE=<mtp-capable-llama-server-image>
+export OPENROUTER_API_KEY=<openrouter-key>
+export SOURCE_DIR="$PWD/src"
+export OUTPUT_DIR="$PWD/certfix-output"
+export HOST_MODEL_DIR=/path/to/models
+export LLAMA_MODEL_PATH=/models/qwen3.6-27b-mtp-ud-q4_k_xl.gguf
+
+docker compose -f docker-compose.local-qwen36.yml up -d llama-server
+docker compose -f docker-compose.local-qwen36.yml run --rm certfix \
+  certfix-docker local-fix --profile local-detection-deepseek-fix-docker
+```
+
+Use the same model mount settings as Option B. If `LLAMA_MODEL_PATH` is not set,
+the compose file falls back to `LLAMA_GGUF_REPO` and lets `llama-server`
+download/cache the configured GGUF.
+
+For additional routing profiles and step overrides, see
+[docs/CONFIGURATION.md](docs/CONFIGURATION.md).
+
+## 2. Example Output
 
 Given this MEM30-C use-after-free example:
 
@@ -229,7 +240,24 @@ LLM output is not guaranteed to be deterministic, so exact output can vary by
 model, provider, prompt profile, runtime settings, and upstream model updates.
 See [docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) for a fuller walkthrough.
 
-## Raw CLI
+## 3. CLI And Configuration
+
+### 3.1 certfix-docker
+
+`certfix-docker` is a container helper. It generates a temporary config inside
+the container, runs `certfix doctor`, then runs `certfix check` only or
+`certfix check` followed by `certfix fix`.
+
+| Command | Default profile | Flow |
+| --- | --- | --- |
+| `certfix-docker api-check` | `deepseek-v4-flash-openrouter` | config, doctor, check |
+| `certfix-docker api-fix` | `deepseek-v4-flash-openrouter` | config, doctor, check, fix |
+| `certfix-docker local-check` | `qwen36-mtp-docker` | config, doctor, check |
+| `certfix-docker local-fix` | `qwen36-mtp-docker` | config, doctor, check, fix |
+
+Use a different bundled profile with `--profile`.
+
+### 3.2 Raw certfix CLI
 
 The Docker helper is the easiest first-run path. The underlying CLI is still
 available for manual installation, development, and custom integration.
@@ -242,32 +270,16 @@ certfix check path/to/source --output-dir certfix-output
 certfix fix path/to/source --output-dir certfix-output
 ```
 
-| Command | First argument | Description |
-| --- | --- | --- |
-| `certfix config <profile>` | Profile name | Print or write a bundled config profile |
-| `certfix doctor` | None | Check environment, API keys, and local server connectivity |
-| `certfix check <path>` | C file or directory | Detect CERT-C issue candidates |
-| `certfix fix <path>` | C file or directory | Generate fixed-code candidates and validation results |
-
-Common options:
-
-| Option | Commands | Description |
-| --- | --- | --- |
-| `--config <file>` | `doctor`, `check`, `fix`, `setup` | Use a config file other than `.certfix.yaml` |
-| `--output-dir <dir>` | `check`, `fix` | Save reports, fixed-code candidates, and patches |
-| `--format text\|json\|sarif` | `check`, `fix` | Select output format |
-| `--force` | `config` | Overwrite an existing output file |
-
 For compiler requirements, direct `llama-server` setup, and non-Docker examples,
 see [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
-## Model Routes And Configuration
+### 3.3 Model Routes And Configuration
 
 Docker helper defaults:
 
 - `api-check` / `api-fix`: DeepSeek V4 Flash through OpenRouter
-- `local-check` / `local-fix`: local Qwen3.6 through an external
-  `llama-server` service
+- `local-check` / `local-fix`: bundled default Qwen3.6 route through an
+  external `llama-server` service
 
 certfix supports local, API, and hybrid model routes through `.certfix.yaml`.
 Use `certfix config <profile> --output .certfix.yaml` to write a bundled
@@ -275,7 +287,7 @@ profile. For the full profile list, include paths, exclusions, advanced
 routing, and token/context tuning, see
 [docs/CONFIGURATION.md](docs/CONFIGURATION.md).
 
-## Exit Codes
+### 3.4 Exit Codes
 
 `certfix check`:
 
@@ -295,22 +307,24 @@ routing, and token/context tuning, see
 
 Use `certfix check` exit codes for CI violation gating.
 
-## Limitations
+## 4. Limitations
 
-certfix is C-only, function-scoped, and limited to the bundled CERT-C rule
-targets. Generated fixes are reviewable candidates, not guaranteed repairs.
-Validation gates reduce risk but do not prove semantic preservation or security
-correctness.
+- C only.
+- Supported CERT-C coverage is limited to the 115 bundled rule targets.
+- CERT-C recommendations are not supported.
+- Analysis is file/function scoped, not whole-program semantic analysis.
+- Generated fixes are candidates for review, not guaranteed correct patches.
+- API-only and hybrid modes may send source code to configured providers.
 
 See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for the full scope and runtime
 caveats.
 
-## Documentation
+## 5. Documentation
 
 | Document | Purpose |
 | --- | --- |
 | [docs/INDEX.md](docs/INDEX.md) | Documentation index |
-| [docs/DOCKER.md](docs/DOCKER.md) | API-only Docker and local Qwen Docker Compose usage |
+| [docs/DOCKER.md](docs/DOCKER.md) | API-only, local `llama-server`, and hybrid Docker usage |
 | [docs/INSTALLATION.md](docs/INSTALLATION.md) | Manual installation, compiler setup, and direct runtime setup |
 | [docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Config lookup, bundled profiles, include paths, advanced routing, and token/context tuning |
@@ -322,15 +336,7 @@ caveats.
 | [docs/RESEARCH_NOTES.md](docs/RESEARCH_NOTES.md) | Boundary between public release docs and research/archive materials |
 | [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | SARIF, CERT-C metadata, and dataset boundary notices |
 
-## AI-Assisted Development
-
-certfix was developed with assistance from Codex and Claude Code for
-implementation, review, planning, and documentation support. Proprietary LLM
-outputs were not used as training targets, training-data labels, or per-record
-training-data audit decisions. See [docs/RESEARCH_NOTES.md](docs/RESEARCH_NOTES.md)
-for the release/research boundary.
-
-## License
+## 6. License
 
 MIT. See [LICENSE](LICENSE).
 

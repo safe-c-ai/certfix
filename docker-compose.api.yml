@@ -1,8 +1,6 @@
 services:
   certfix:
-    build:
-      context: .
-    image: ghcr.io/safe-c-ai/certfix:api-local
+    image: "${CERTFIX_IMAGE:-ghcr.io/safe-c-ai/certfix:edge}"
     working_dir: /input
     volumes:
       - "${SOURCE_DIR:-.}:/input:ro"
@@ -10,4 +8,4 @@ services:
     environment:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
-    command: ["certfix-docker", "api-fix"]
+    command: ["certfix-docker", "api-check"]

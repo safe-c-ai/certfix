@@ -67,7 +67,7 @@ jobs:
           tags: ${{ steps.image.outputs.tags }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
-            org.opencontainers.image.description=certfix API-only CLI image
+            org.opencontainers.image.description=certfix CLI image for API, local, and hybrid routes
             org.opencontainers.image.licenses=MIT
 
       - name: Smoke test published image

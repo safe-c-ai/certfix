@@ -28,7 +28,7 @@ semantic preservation, or security correctness.
 - Functions up to about 200 lines are the expected case. Results may become
   less stable above that, and functions over about 300 lines should be split
   before running certfix.
-- v0.2.0 fixed-code candidates are comment-stripped; comment-preserving repair
+- Fixed-code candidates are comment-stripped; comment-preserving repair
   is not implemented.
 
 ## Validation And Runtime

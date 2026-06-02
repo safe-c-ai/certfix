@@ -37,6 +37,7 @@ Profile names are CLI names, not file paths. For example,
 | `deepseek-v4-flash-api` | DeepSeek V4 Flash through DeepSeek's official API |
 | `gemini-3-flash-preview-openrouter` | Gemini 3 Flash Preview through OpenRouter |
 | `local-detection-deepseek-fix` | Local Qwen3.6 detection with DeepSeek repair/validation |
+| `local-detection-deepseek-fix-docker` | Docker Compose local Qwen3.6 detection with DeepSeek repair/validation |
 | `deepseek-gemini-step-overrides` | Advanced example for per-step model routing |
 
 List the same profiles from the CLI:
@@ -144,6 +145,12 @@ Use `qwen36-mtp-local` when certfix runs on the host and talks to
 `http://127.0.0.1:8952/v1`. Use `qwen36-mtp-docker` when certfix runs inside
 `docker-compose.local-qwen36.yml`; that profile points to the Compose service
 URL `http://llama-server:8952/v1`.
+
+For hybrid local/API routing, use `local-detection-deepseek-fix` on the host
+with a host-local `llama-server`, and use `local-detection-deepseek-fix-docker`
+inside Docker Compose. The Docker profile points detection to
+`http://llama-server:8952/v1` and still sends repair/validation steps to the
+configured API provider.
 
 ### Long Functions And Token Limits
 

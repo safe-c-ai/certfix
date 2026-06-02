@@ -8,7 +8,7 @@ fi
 if [ -n "${LLAMA_MODEL_PATH:-}" ]; then
   set -- -m "$LLAMA_MODEL_PATH"
 else
-  set -- -hf "${QWEN36_GGUF_REPO:-unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL}"
+  set -- -hf "${LLAMA_GGUF_REPO:-${QWEN36_GGUF_REPO:-unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL}}"
 fi
 
 exec llama-server \

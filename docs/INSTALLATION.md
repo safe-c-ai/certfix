@@ -3,8 +3,8 @@
 Use manual installation when you are developing certfix itself, integrating it
 into an existing Python environment, or managing `llama-server` directly.
 
-For the recommended first-run path, use the Docker quick start in
-[README.md](../README.md#quick-start-with-docker).
+For the recommended first-run path, use Getting Started in
+[README.md](../README.md#1-getting-started).
 
 ## Install
 
@@ -117,7 +117,7 @@ certfix doctor
 ```
 
 `certfix doctor` shows a warning and a server command example if the local
-server is not reachable. v0.2.0 does not auto-start `llama-server`.
+server is not reachable. certfix does not auto-start `llama-server`.
 
 ## Manual Quick Start
 
@@ -173,13 +173,8 @@ For Docker Compose, use the `qwen36-mtp-docker` profile instead. It points
 certfix at the Compose service URL `http://llama-server:8952/v1` rather than
 `127.0.0.1`.
 
-```bash
-export LLAMA_SERVER_IMAGE=<mtp-capable-llama-server-image>
-docker compose -f docker-compose.local-qwen36.yml up -d llama-server
-docker compose -f docker-compose.local-qwen36.yml run --rm certfix certfix-docker local-fix
-```
-
-See [DOCKER.md](DOCKER.md) for the full local Compose flow and host GPU/runtime
+See [DOCKER.md](DOCKER.md) for the full local Compose flow, including
+`local-check`, `local-fix`, model/cache mounts, and host GPU/runtime
 requirements.
 
 ### API And Local Combined

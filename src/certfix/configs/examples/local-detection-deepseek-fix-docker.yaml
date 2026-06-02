@@ -1,15 +1,13 @@
-# Local Qwen3.6 detection with DeepSeek V4 Flash repair/validation.
+# Docker Compose local Qwen3.6 detection with DeepSeek V4 Flash repair/validation.
 #
-# Use this profile when local Qwen3.6 MTP is available and DeepSeek V4 Flash is
-# used only for the repair side of the pipeline.
+# Use this profile when certfix runs in Docker Compose beside the
+# `llama-server` service from docker-compose.local-qwen36.yml. Detection stays
+# on the Compose local Qwen3.6 route; repair and validation are routed through
+# DeepSeek V4 Flash on OpenRouter.
 #
 # Required runtime:
 #
-#   llama-server -m /path/to/qwen3.6-27b-mtp-ud-q4_k_xl.gguf \
-#     -ngl 99 -c 8192 -fa on -np 1 \
-#     --host 127.0.0.1 --port 8952 \
-#     --cache-ram 0 \
-#     --spec-type draft-mtp --spec-draft-n-max 2
+#   docker compose -f docker-compose.local-qwen36.yml up -d llama-server
 #
 # Required environment:
 #
@@ -23,7 +21,7 @@ detection:
   qwen36_selector_candidate_k: 2
   qwen36_selector_permutations: 3
   api:
-    base_url: http://127.0.0.1:8952/v1
+    base_url: http://llama-server:8952/v1
     model: unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL
     api_key_env: ""
     timeout: 300

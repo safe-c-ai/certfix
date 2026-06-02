@@ -24,6 +24,7 @@ manual because they depend on local servers and provider credentials.
   - `configs/deepseek-v4-flash-api.yaml`
   - `configs/gemini-3-flash-preview-openrouter.yaml`
   - `configs/examples/local-detection-deepseek-fix.yaml`
+  - `configs/examples/local-detection-deepseek-fix-docker.yaml`
   - `configs/examples/deepseek-gemini-step-overrides.yaml`
 - [ ] Local-only configs remain ignored by git:
   - `configs/local-*.yaml`
@@ -58,8 +59,9 @@ manual because they depend on local servers and provider credentials.
   `docker run --rm certfix-ci certfix-docker --help`.
 - [ ] API-only Docker wrapper can mount source at `/input:ro` and output at
   `/output`.
-- [ ] Local Qwen Docker Compose config resolves with `SOURCE_DIR`,
-  `OUTPUT_DIR`, `QWEN36_MODEL_DIR`, and `LLAMA_MODEL_PATH` set.
+- [ ] Local `llama-server` Docker Compose config resolves with `SOURCE_DIR`,
+  `OUTPUT_DIR`, `HOST_MODEL_DIR`, `HOST_MODEL_CACHE_DIR`, and
+  `LLAMA_MODEL_PATH` set.
 
 Latest smoke: local Qwen3.6 MTP check/fix passed on
 `tests/fixtures/mem30_use_after_free.c` with `draft-mtp` enabled in the server
@@ -87,11 +89,11 @@ log. Wheel install-equivalent config list/write/doctor/check also passed.
 
 ## Documentation
 
-- [ ] README Quick Start uses a real public config.
+- [ ] README Getting Started commands use real public config profiles.
 - [ ] README distinguishes local, cheap API, direct DeepSeek API, quality API,
   and advanced step-routing profiles.
-- [ ] Docker docs distinguish API-only Docker from local Qwen3.6 Docker Compose
-  and state the host GPU/runtime requirements.
+- [ ] Docker docs distinguish API-only, local `llama-server` Compose, and hybrid
+  Compose routes and state the host GPU/runtime requirements.
 - [ ] Public docs avoid internal Phase/Run/checkpoint identifiers as primary
   user guidance.
 - [ ] `CLAUDE.md` and `docs/research-archive/` are not present in the initial
@@ -99,7 +101,7 @@ log. Wheel install-equivalent config list/write/doctor/check also passed.
 - [ ] `THIRD_PARTY_NOTICES.md` is present and references SARIF and CERT-C rule
   metadata boundaries.
 - [ ] Wheel users can read third-party notices:
-  `unzip -l dist/certfix-0.2.0-py3-none-any.whl | grep THIRD_PARTY_NOTICES`
+  `unzip -l dist/certfix-0.3.0-py3-none-any.whl | grep THIRD_PARTY_NOTICES`
 - [ ] Third-party evaluation sample files such as Juliet or PrimeVul-derived
   `*samples.jsonl.gz` files are not bundled in the initial public repository.
 - [ ] `eval-splits/` is not bundled in the initial public repository or sdist.

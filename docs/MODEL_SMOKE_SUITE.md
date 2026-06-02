@@ -1,6 +1,6 @@
 # Model Smoke Suite
 
-This document describes the manual, model-backed smoke suite for the v0.1.0
+This document describes the manual, model-backed smoke suite for the current
 release pipeline.
 
 The suite is intentionally not part of pytest. It loads real models and can take

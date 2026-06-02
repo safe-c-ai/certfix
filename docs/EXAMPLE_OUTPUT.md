@@ -9,6 +9,10 @@ file.
 The bundled sample `examples/input/mem30_use_after_free.c` contains a MEM30-C
 use-after-free issue candidate:
 
+This example assumes a cloned certfix repository checkout where
+`examples/input/` exists. If you installed certfix from PyPI or only pulled the
+Docker image, use your own C source file instead.
+
 ```c
 int run_mem30_demo(void) {
     char *p = make_message("primary", 7);
