@@ -23,6 +23,43 @@ docker run --rm ghcr.io/safe-c-ai/certfix:edge --help
 docker run --rm ghcr.io/safe-c-ai/certfix:edge certfix-docker --help
 ```
 
+### What Files Are Required?
+
+For the normal published-image path, no certfix repository files are required.
+Create or choose a folder containing the C source files to scan, then create an
+output folder:
+
+```text
+my-test/
++-- source/          # your .c / .h files
+`-- certfix-output/  # generated reports, fixed-code candidates, and patches
+```
+
+Then mount those folders:
+
+```bash
+docker run --rm \
+  -e OPENROUTER_API_KEY \
+  -v "$PWD/source:/input:ro" \
+  -v "$PWD/certfix-output:/output" \
+  ghcr.io/safe-c-ai/certfix:edge \
+  certfix-docker api-check
+```
+
+The files you need depend on the Docker route:
+
+| Route | Files to copy into a separate test folder |
+| --- | --- |
+| Published image with `docker run` | none; only your source folder and output folder |
+| API-only Compose | `docker-compose.api.yml` |
+| Local Qwen Compose with an existing `llama-server` image | `docker-compose.local-qwen36.yml` |
+| Local Qwen Compose with the provided `llama-server` build recipe | `docker-compose.local-qwen36.yml`, `docker/llama-server/Dockerfile`, `docker/llama-server/entrypoint.sh` |
+| Build the certfix image locally | full certfix repository checkout |
+
+The certfix image itself is pulled from GHCR for the published-image and Compose
+paths. The `docker/llama-server` files are only for building your own
+MTP-capable `llama-server` image; certfix does not publish one.
+
 ## Build The Image Locally
 
 From a certfix repository checkout:

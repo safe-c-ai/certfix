@@ -59,6 +59,29 @@ docker run --rm \
 For Docker Compose, local Qwen3.6, model/cache mounts, and Linux user-id
 options, see [docs/DOCKER.md](docs/DOCKER.md).
 
+### What To Copy For A Separate Test Folder
+
+When using the published certfix image with `docker run`, you do not need to
+copy files from the certfix repository. Put the C source files you want to scan
+in a folder, create an output folder, and mount them as `/input` and `/output`.
+
+```text
+my-test/
++-- source/          # your .c / .h files
+`-- certfix-output/  # generated reports, fixed-code candidates, and patches
+```
+
+If you want to use Docker Compose instead of `docker run`, copy only the Compose
+file for the route you are testing:
+
+- API-only Compose: `docker-compose.api.yml`
+- Local Qwen3.6 Compose with a self-built `llama-server` image:
+  `docker-compose.local-qwen36.yml`, `docker/llama-server/Dockerfile`, and
+  `docker/llama-server/entrypoint.sh`
+
+You need a full certfix repository checkout only when building the certfix image
+itself locally.
+
 ## Manual Installation And Requirements
 
 Use manual installation when you are developing certfix itself, integrating it
