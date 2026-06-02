@@ -1,14 +1,14 @@
 # certfix Documentation Index
 
 This index lists the public documentation for the certfix v0.2.0 release.
-Start with the root [README.md](../README.md) for Docker quick start, commands,
-model profiles, limitations, and license information.
+Start with the root [README.md](../README.md) for Docker runtime selection,
+quick start commands, model routes, limitations, and license information.
 
 ## User Documents
 
 | Document | Purpose |
 | --- | --- |
-| [../README.md](../README.md) | User guide, Docker quick start, commands, profiles, limitations, and license |
+| [../README.md](../README.md) | User guide, Docker runtime selection, quick start commands, model routes, limitations, and license |
 | [DOCKER.md](DOCKER.md) | API-only Docker and local Qwen Docker Compose usage |
 | [INSTALLATION.md](INSTALLATION.md) | Manual installation, compiler setup, local `llama-server` setup, and non-Docker examples |
 | [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
@@ -38,12 +38,12 @@ than normal CLI users.
 
 ## Quick Links
 
-- Docker quick start: [README.md](../README.md#quick-start-with-docker)
+- Docker quick start: [README.md](../README.md#quick-start-check-with-api)
 - Manual installation and requirements: [INSTALLATION.md](INSTALLATION.md)
 - Docker usage: [DOCKER.md](DOCKER.md)
 - Example output: [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md)
-- Commands: [README.md](../README.md#commands)
-- Model profiles: [README.md](../README.md#model-profiles)
+- Commands: [README.md](../README.md#what-is-certfix-docker)
+- Model routes: [README.md](../README.md#model-routes-and-configuration)
 - Configuration details: [CONFIGURATION.md](CONFIGURATION.md)
 - Supported rule catalog: [SUPPORTED_RULES.md](SUPPORTED_RULES.md)
 - Local MTP runtime: [QWEN36_MTP_RUNTIME.md](QWEN36_MTP_RUNTIME.md)
