@@ -1,34 +1,24 @@
 services:
   llama-server:
     image: "${LLAMA_SERVER_IMAGE:?Set LLAMA_SERVER_IMAGE to an MTP-capable llama-server image}"
-    entrypoint: ["llama-server"]
-    command:
-      - -hf
-      - "${QWEN36_GGUF_REPO:-unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL}"
-      - -ngl
-      - "${LLAMA_N_GPU_LAYERS:-99}"
-      - -c
-      - "${LLAMA_CONTEXT_SIZE:-8192}"
-      - -fa
-      - "on"
-      - -np
-      - "1"
-      - --host
-      - 0.0.0.0
-      - --port
-      - "8952"
-      - --cache-ram
-      - "0"
-      - --spec-type
-      - draft-mtp
-      - --spec-draft-n-max
-      - "${LLAMA_SPEC_DRAFT_N_MAX:-2}"
-      - --reasoning-budget
-      - "${LLAMA_REASONING_BUDGET:-1024}"
+    entrypoint: ["/usr/local/bin/certfix-llama-entrypoint"]
+    environment:
+      QWEN36_GGUF_REPO: "${QWEN36_GGUF_REPO:-unsloth/Qwen3.6-27B-MTP-GGUF:UD-Q4_K_XL}"
+      LLAMA_MODEL_PATH: "${LLAMA_MODEL_PATH:-}"
+      LLAMA_N_GPU_LAYERS: "${LLAMA_N_GPU_LAYERS:-99}"
+      LLAMA_CONTEXT_SIZE: "${LLAMA_CONTEXT_SIZE:-8192}"
+      LLAMA_FLASH_ATTN: "${LLAMA_FLASH_ATTN:-on}"
+      LLAMA_PARALLEL: "${LLAMA_PARALLEL:-1}"
+      LLAMA_CACHE_RAM: "${LLAMA_CACHE_RAM:-0}"
+      LLAMA_SPEC_TYPE: "${LLAMA_SPEC_TYPE:-draft-mtp}"
+      LLAMA_SPEC_DRAFT_N_MAX: "${LLAMA_SPEC_DRAFT_N_MAX:-2}"
+      LLAMA_REASONING_BUDGET: "${LLAMA_REASONING_BUDGET:-1024}"
     ports:
       - "${LLAMA_SERVER_PORT:-8952}:8952"
     volumes:
-      - qwen36-model-cache:/root/.cache
+      - "${QWEN36_MODEL_DIR:-./models}:/models:ro"
+      - "${QWEN36_CACHE_DIR:-qwen36-model-cache}:/root/.cache"
+      - "./docker/llama-server/entrypoint.sh:/usr/local/bin/certfix-llama-entrypoint:ro"
     deploy:
       resources:
         reservations:
@@ -39,12 +29,13 @@ services:
 
   certfix:
     image: "${CERTFIX_IMAGE:-ghcr.io/safe-c-ai/certfix:edge}"
-    working_dir: /workspace
+    working_dir: /input
     volumes:
-      - .:/workspace
+      - "${SOURCE_DIR:-.}:/input:ro"
+      - "${OUTPUT_DIR:-./certfix-output}:/output"
     depends_on:
       - llama-server
-    entrypoint: ["certfix"]
+    command: ["certfix-docker", "local-fix"]
 
 volumes:
   qwen36-model-cache:

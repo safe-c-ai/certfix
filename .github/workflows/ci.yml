@@ -58,6 +58,7 @@ jobs:
           /tmp/certfix-wheel-smoke/bin/python -m pip install --upgrade pip
           /tmp/certfix-wheel-smoke/bin/python -m pip install dist/*.whl
           /tmp/certfix-wheel-smoke/bin/certfix --help
+          /tmp/certfix-wheel-smoke/bin/certfix-docker --help
           /tmp/certfix-wheel-smoke/bin/certfix config --list
           /tmp/certfix-wheel-smoke/bin/certfix config qwen36-mtp-local --output /tmp/certfix-smoke.yaml
           test -s /tmp/certfix-smoke.yaml
@@ -67,4 +68,5 @@ jobs:
         run: |
           docker build -t certfix-ci .
           docker run --rm certfix-ci --help
+          docker run --rm certfix-ci certfix-docker --help
           docker run --rm certfix-ci config --list

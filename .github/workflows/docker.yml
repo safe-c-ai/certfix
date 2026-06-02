@@ -74,4 +74,5 @@ jobs:
         run: |
           first_tag="$(printf '%s\n' "${{ steps.image.outputs.tags }}" | head -n 1)"
           docker run --rm "${first_tag}" --help
+          docker run --rm "${first_tag}" certfix-docker --help
           docker run --rm "${first_tag}" config --list

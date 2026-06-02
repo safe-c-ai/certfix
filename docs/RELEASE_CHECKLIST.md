@@ -54,6 +54,12 @@ manual because they depend on local servers and provider credentials.
 - [ ] `certfix check <sample.c> --config configs/qwen36-mtp-local.yaml --output-dir certfix-output` runs.
 - [ ] `certfix fix <sample.c> --config configs/qwen36-mtp-local.yaml --output-dir certfix-output`
   runs on a small smoke case.
+- [ ] Docker wrapper help works from the built image:
+  `docker run --rm certfix-ci certfix-docker --help`.
+- [ ] API-only Docker wrapper can mount source at `/input:ro` and output at
+  `/output`.
+- [ ] Local Qwen Docker Compose config resolves with `SOURCE_DIR`,
+  `OUTPUT_DIR`, `QWEN36_MODEL_DIR`, and `LLAMA_MODEL_PATH` set.
 
 Latest smoke: local Qwen3.6 MTP check/fix passed on
 `tests/fixtures/mem30_use_after_free.c` with `draft-mtp` enabled in the server

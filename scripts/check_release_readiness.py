@@ -46,7 +46,10 @@ INTERNAL_PATTERN = re.compile(
 
 PUBLIC_SCAN_PATHS = [
     ".certfix.yaml.example",
+    ".github/workflows/ci.yml",
+    ".github/workflows/docker.yml",
     "AGENTS.md",
+    "Dockerfile",
     "README.md",
     "THIRD_PARTY_NOTICES.md",
     "configs/qwen36-mtp-local.yaml",
@@ -57,6 +60,9 @@ PUBLIC_SCAN_PATHS = [
     "configs/gemini-3-flash-preview-openrouter.yaml",
     "configs/examples/local-detection-deepseek-fix.yaml",
     "configs/examples/deepseek-gemini-step-overrides.yaml",
+    "docker",
+    "docker-compose.api.yml",
+    "docker-compose.local-qwen36.yml",
     "src/certfix/configs",
     "docs/ARCHITECTURE.md",
     "docs/BENCHMARK_SUMMARY.md",

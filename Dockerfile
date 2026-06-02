@@ -14,11 +14,13 @@ WORKDIR /opt/certfix
 
 COPY pyproject.toml README.md LICENSE THIRD_PARTY_NOTICES.md ./
 COPY src ./src
+COPY docker/certfix-entrypoint.sh /usr/local/bin/certfix-entrypoint
 
 RUN python -m pip install --no-cache-dir --upgrade pip \
-    && python -m pip install --no-cache-dir .
+    && python -m pip install --no-cache-dir . \
+    && chmod +x /usr/local/bin/certfix-entrypoint
 
 WORKDIR /workspace
 
-ENTRYPOINT ["certfix"]
+ENTRYPOINT ["certfix-entrypoint"]
 CMD ["--help"]

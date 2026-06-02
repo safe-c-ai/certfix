@@ -3,10 +3,11 @@ services:
     build:
       context: .
     image: ghcr.io/safe-c-ai/certfix:api-local
-    working_dir: /workspace
+    working_dir: /input
     volumes:
-      - .:/workspace
+      - "${SOURCE_DIR:-.}:/input:ro"
+      - "${OUTPUT_DIR:-./certfix-output}:/output"
     environment:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
-    entrypoint: ["certfix"]
+    command: ["certfix-docker", "api-fix"]

@@ -20,7 +20,49 @@ fixed-code candidates for C source code with LLMs.
   review gates
 - Produce machine-readable JSON / SARIF output and exit codes
 
-## Installation And Requirements
+## Quick Start With Docker
+
+Docker is the recommended first-run path because the image includes Python,
+certfix, and the compiler tools needed for validation. Source files are mounted
+read-only at `/input`, and reports, fixed-code candidates, and patches are
+written to `/output`.
+
+API routes send source code to the configured provider. Confirm your project
+data policy before using a cloud provider.
+
+```bash
+export OPENROUTER_API_KEY=<openrouter-key>
+mkdir -p certfix-output
+
+docker run --rm \
+  -e OPENROUTER_API_KEY \
+  -v "$PWD:/input:ro" \
+  -v "$PWD/certfix-output:/output" \
+  ghcr.io/safe-c-ai/certfix:edge \
+  certfix-docker api-fix
+```
+
+This generates a temporary Docker config inside the container, runs `doctor`,
+then runs `check` followed by `fix`. Source files are not modified.
+
+Use `api-check` instead of `api-fix` when you only want reports:
+
+```bash
+docker run --rm \
+  -e OPENROUTER_API_KEY \
+  -v "$PWD:/input:ro" \
+  -v "$PWD/certfix-output:/output" \
+  ghcr.io/safe-c-ai/certfix:edge \
+  certfix-docker api-check
+```
+
+For Docker Compose, local Qwen3.6, model/cache mounts, and Linux user-id
+options, see [docs/DOCKER.md](docs/DOCKER.md).
+
+## Manual Installation And Requirements
+
+Use manual installation when you are developing certfix itself, integrating it
+into an existing Python environment, or managing `llama-server` directly.
 
 ### Install
 
@@ -154,11 +196,12 @@ comment-stripped fixed-code candidates under `fixes/` plus patches under
 
 No local GPU or `llama-server` is required.
 
-Docker users can run the API-only image with the current directory mounted as
-`/workspace`. API routes send source code to the configured provider.
+Docker users can run the API-only image with source mounted read-only at
+`/input` and output written to `/output`. API routes send source code to the
+configured provider.
 
 ```bash
-docker run --rm -e OPENROUTER_API_KEY -v "$PWD":/workspace ghcr.io/safe-c-ai/certfix:edge --help
+docker run --rm -e OPENROUTER_API_KEY -v "$PWD:/input:ro" -v "$PWD/certfix-output:/output" ghcr.io/safe-c-ai/certfix:edge certfix-docker api-fix
 ```
 
 See [docs/DOCKER.md](docs/DOCKER.md) for Docker and Docker Compose examples.
@@ -201,8 +244,7 @@ certfix at the Compose service URL `http://llama-server:8952/v1` rather than
 ```bash
 export LLAMA_SERVER_IMAGE=<mtp-capable-llama-server-image>
 docker compose -f docker-compose.local-qwen36.yml up -d llama-server
-docker compose -f docker-compose.local-qwen36.yml run --rm certfix config qwen36-mtp-docker --output .certfix.yaml --force
-docker compose -f docker-compose.local-qwen36.yml run --rm certfix doctor
+docker compose -f docker-compose.local-qwen36.yml run --rm certfix certfix-docker local-fix
 ```
 
 See [docs/DOCKER.md](docs/DOCKER.md) for the full local Compose flow and host

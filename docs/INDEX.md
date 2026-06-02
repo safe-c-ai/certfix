@@ -1,14 +1,14 @@
 # certfix Documentation Index
 
 This index lists the public documentation for the certfix v0.2.0 release.
-Start with the root [README.md](../README.md) for installation, quick start,
-commands, model profiles, limitations, and license information.
+Start with the root [README.md](../README.md) for Docker quick start, manual
+installation, commands, model profiles, limitations, and license information.
 
 ## User Documents
 
 | Document | Purpose |
 | --- | --- |
-| [../README.md](../README.md) | User guide, quick start, commands, profiles, limitations, and license |
+| [../README.md](../README.md) | User guide, Docker quick start, manual installation, commands, profiles, limitations, and license |
 | [DOCKER.md](DOCKER.md) | API-only Docker and local Qwen Docker Compose usage |
 | [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [CONFIGURATION.md](CONFIGURATION.md) | `.certfix.yaml` lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
@@ -37,7 +37,8 @@ than normal CLI users.
 
 ## Quick Links
 
-- Installation and requirements: [README.md](../README.md#installation-and-requirements)
+- Docker quick start: [README.md](../README.md#quick-start-with-docker)
+- Manual installation and requirements: [README.md](../README.md#manual-installation-and-requirements)
 - Quick start: [README.md](../README.md#quick-start)
 - Docker usage: [DOCKER.md](DOCKER.md)
 - Example output: [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md)

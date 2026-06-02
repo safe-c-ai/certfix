@@ -45,6 +45,7 @@ dev = [
 
 [project.scripts]
 certfix = "certfix.cli:main"
+certfix-docker = "certfix.docker_wrapper:main"
 
 [project.urls]
 Homepage = "https://github.com/safe-c-ai/certfix"
