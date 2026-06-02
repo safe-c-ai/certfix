@@ -1,15 +1,16 @@
 # certfix Documentation Index
 
 This index lists the public documentation for the certfix v0.2.0 release.
-Start with the root [README.md](../README.md) for Docker quick start, manual
-installation, commands, model profiles, limitations, and license information.
+Start with the root [README.md](../README.md) for Docker quick start, commands,
+model profiles, limitations, and license information.
 
 ## User Documents
 
 | Document | Purpose |
 | --- | --- |
-| [../README.md](../README.md) | User guide, Docker quick start, manual installation, commands, profiles, limitations, and license |
+| [../README.md](../README.md) | User guide, Docker quick start, commands, profiles, limitations, and license |
 | [DOCKER.md](DOCKER.md) | API-only Docker and local Qwen Docker Compose usage |
+| [INSTALLATION.md](INSTALLATION.md) | Manual installation, compiler setup, local `llama-server` setup, and non-Docker examples |
 | [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [CONFIGURATION.md](CONFIGURATION.md) | `.certfix.yaml` lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
 | [SUPPORTED_RULES.md](SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
@@ -38,8 +39,7 @@ than normal CLI users.
 ## Quick Links
 
 - Docker quick start: [README.md](../README.md#quick-start-with-docker)
-- Manual installation and requirements: [README.md](../README.md#manual-installation-and-requirements)
-- Quick start: [README.md](../README.md#quick-start)
+- Manual installation and requirements: [INSTALLATION.md](INSTALLATION.md)
 - Docker usage: [DOCKER.md](DOCKER.md)
 - Example output: [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md)
 - Commands: [README.md](../README.md#commands)
