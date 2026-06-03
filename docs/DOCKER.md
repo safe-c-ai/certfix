@@ -35,9 +35,9 @@ Use a numbered release tag for normal use. The `edge` image follows the public
 `main` branch and can change after each merge.
 
 ```bash
-docker pull ghcr.io/safe-c-ai/certfix:0.3.1
-docker run --rm ghcr.io/safe-c-ai/certfix:0.3.1 --help
-docker run --rm ghcr.io/safe-c-ai/certfix:0.3.1 certfix-docker --help
+docker pull ghcr.io/safe-c-ai/certfix:0.4.0
+docker run --rm ghcr.io/safe-c-ai/certfix:0.4.0 --help
+docker run --rm ghcr.io/safe-c-ai/certfix:0.4.0 certfix-docker --help
 ```
 
 Tagged release images are published as `ghcr.io/safe-c-ai/certfix:<version>`
@@ -93,7 +93,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.3.1 \
+  ghcr.io/safe-c-ai/certfix:0.4.0 \
   certfix-docker api-check
 ```
 
@@ -110,9 +110,15 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.3.1 \
+  ghcr.io/safe-c-ai/certfix:0.4.0 \
   certfix-docker api-fix
 ```
+
+Add `--comment-merge` to generate additional comment-merged review artifacts,
+or `--comment-merge-audit` to have an LLM suppress stale or misleading restored
+comments before those artifacts are written. The audit sends original/restored
+comments to the configured review model, so do not enable it with an API
+provider when comments are sensitive.
 
 ### 3.3 Use API-Only Compose
 
@@ -144,7 +150,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.3.1 \
+  ghcr.io/safe-c-ai/certfix:0.4.0 \
   certfix-docker api-fix --profile gemini-3-flash-preview-openrouter
 ```
 
@@ -238,6 +244,11 @@ Run `local-fix` explicitly when you want fixed-code candidates and patches:
 docker compose -f docker-compose.local-qwen36.yml run --rm certfix certfix-docker local-fix
 ```
 
+Use `certfix-docker local-fix --comment-merge` for deterministic
+comment-merged review artifacts, or `--comment-merge-audit` to audit restored
+comments with the configured review model. If you route that review model to an
+API provider, original/restored comments are sent to that provider.
+
 ### 4.6 Stop Services
 
 ```bash
@@ -308,6 +319,8 @@ MTP-capable `llama-server` image; certfix does not publish one.
 | `--output` | `/output` | Output directory |
 | `--config` | `/tmp/certfix-docker.yaml` | Temporary generated config path |
 | `--profile` | command-specific | Bundled profile to generate |
+| `--comment-merge` | false | Add conservative comment-merged review artifacts for fix commands |
+| `--comment-merge-audit` | false | LLM-audit comment-merged artifacts before writing them |
 | `--skip-doctor` | false | Skip diagnostics before check/fix |
 
 ### 6.4 Compose Environment Variables
@@ -316,7 +329,7 @@ Required for all Compose routes:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `CERTFIX_IMAGE` | `ghcr.io/safe-c-ai/certfix:0.3.1` | certfix CLI image |
+| `CERTFIX_IMAGE` | `ghcr.io/safe-c-ai/certfix:0.4.0` | certfix CLI image |
 | `SOURCE_DIR` | `.` | Host source path mounted read-only at `/input` |
 | `OUTPUT_DIR` | `./certfix-output` | Host output path mounted at `/output` |
 

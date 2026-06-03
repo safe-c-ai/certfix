@@ -48,17 +48,27 @@ def _run_check(input_path: Path, output_dir: Path, config_path: Path) -> int:
     )
 
 
-def _run_fix(input_path: Path, output_dir: Path, config_path: Path) -> int:
-    return _run_certfix(
-        [
-            "fix",
-            str(input_path),
-            "--config",
-            str(config_path),
-            "--output-dir",
-            str(output_dir),
-        ]
-    )
+def _run_fix(
+    input_path: Path,
+    output_dir: Path,
+    config_path: Path,
+    *,
+    comment_merge: bool,
+    comment_merge_audit: bool,
+) -> int:
+    args = [
+        "fix",
+        str(input_path),
+        "--config",
+        str(config_path),
+        "--output-dir",
+        str(output_dir),
+    ]
+    if comment_merge:
+        args.append("--comment-merge")
+    if comment_merge_audit:
+        args.append("--comment-merge-audit")
+    return _run_certfix(args)
 
 
 def _run_flow(
@@ -69,6 +79,8 @@ def _run_flow(
     config_path: Path,
     mode: str,
     skip_doctor: bool,
+    comment_merge: bool,
+    comment_merge_audit: bool,
 ) -> int:
     _prepare_paths(input_path, output_dir, config_path)
 
@@ -87,16 +99,33 @@ def _run_flow(
     if check_exit == 2:
         return check_exit
 
-    return _run_fix(input_path, output_dir, config_path)
+    return _run_fix(
+        input_path,
+        output_dir,
+        config_path,
+        comment_merge=comment_merge or comment_merge_audit,
+        comment_merge_audit=comment_merge_audit,
+    )
 
 
-def _common_options(default_profile: str):
+def _common_options(default_profile: str, *, include_fix_options: bool = False):
     def decorator(command):
         command = click.option(
             "--skip-doctor",
             is_flag=True,
             help="Skip certfix doctor before running check/fix.",
         )(command)
+        if include_fix_options:
+            command = click.option(
+                "--comment-merge-audit",
+                is_flag=True,
+                help="LLM-audit comment-merged artifacts before writing them.",
+            )(command)
+            command = click.option(
+                "--comment-merge",
+                is_flag=True,
+                help="Write optional comment-merged fixed-code artifacts after validation.",
+            )(command)
         command = click.option(
             "--config",
             "config_path",
@@ -155,18 +184,22 @@ def api_check(
             config_path=config_path,
             mode="check",
             skip_doctor=skip_doctor,
+            comment_merge=False,
+            comment_merge_audit=False,
         )
     )
 
 
 @main.command("api-fix")
-@_common_options(API_PROFILE)
+@_common_options(API_PROFILE, include_fix_options=True)
 def api_fix(
     profile: str,
     input_path: Path,
     output_dir: Path,
     config_path: Path,
     skip_doctor: bool,
+    comment_merge: bool,
+    comment_merge_audit: bool,
 ) -> None:
     """Generate an API profile and run certfix check followed by fix."""
     raise SystemExit(
@@ -177,6 +210,8 @@ def api_fix(
             config_path=config_path,
             mode="fix",
             skip_doctor=skip_doctor,
+            comment_merge=comment_merge,
+            comment_merge_audit=comment_merge_audit,
         )
     )
 
@@ -199,18 +234,22 @@ def local_check(
             config_path=config_path,
             mode="check",
             skip_doctor=skip_doctor,
+            comment_merge=False,
+            comment_merge_audit=False,
         )
     )
 
 
 @main.command("local-fix")
-@_common_options(LOCAL_PROFILE)
+@_common_options(LOCAL_PROFILE, include_fix_options=True)
 def local_fix(
     profile: str,
     input_path: Path,
     output_dir: Path,
     config_path: Path,
     skip_doctor: bool,
+    comment_merge: bool,
+    comment_merge_audit: bool,
 ) -> None:
     """Generate the Docker local Qwen profile and run check followed by fix."""
     raise SystemExit(
@@ -221,6 +260,8 @@ def local_fix(
             config_path=config_path,
             mode="fix",
             skip_doctor=skip_doctor,
+            comment_merge=comment_merge,
+            comment_merge_audit=comment_merge_audit,
         )
     )
 

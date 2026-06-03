@@ -287,12 +287,18 @@ class FixResult:
     source: str | None = None
     retry_count: int = 0
     retry_metadata: dict[str, object] = field(default_factory=dict)
+    artifact_original_code: str | None = None
 
     def to_diff(self) -> str:
         """Generate unified diff."""
         import difflib
 
-        original_lines = self.original_code.splitlines(keepends=True)
+        original = (
+            self.artifact_original_code
+            if self.artifact_original_code is not None
+            else self.original_code
+        )
+        original_lines = original.splitlines(keepends=True)
         fixed_lines = self.fixed_code.splitlines(keepends=True)
 
         diff = difflib.unified_diff(

@@ -77,3 +77,13 @@ class TestPreprocessor:
         assert "line2" not in processed
         lines = processed.split("\n")
         assert len(lines) == 4
+
+    def test_comment_markers_inside_string_literals_are_preserved(self) -> None:
+        """String contents should not be treated as comments."""
+        preprocessor = Preprocessor(keep_comments=False)
+        code = 'printf("http://example.com/a/*not-comment*/b"); // real comment'
+
+        processed, _mapping, _ignored = preprocessor.process(code)
+
+        assert '"http://example.com/a/*not-comment*/b"' in processed
+        assert "real comment" not in processed

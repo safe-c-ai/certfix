@@ -75,7 +75,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.3.1 \
+  ghcr.io/safe-c-ai/certfix:0.4.0 \
   certfix-docker api-check
 ```
 
@@ -91,7 +91,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.3.1 \
+  ghcr.io/safe-c-ai/certfix:0.4.0 \
   certfix-docker api-fix
 ```
 
@@ -105,7 +105,7 @@ docker run --rm `
   -e OPENROUTER_API_KEY `
   -v "$($PWD.Path)\src:/input:ro" `
   -v "$($PWD.Path)\certfix-output:/output" `
-  ghcr.io/safe-c-ai/certfix:0.3.1 `
+  ghcr.io/safe-c-ai/certfix:0.4.0 `
   certfix-docker api-check
 ```
 
@@ -236,6 +236,24 @@ certfix-output/
     `-- mem30_use_after_free.c.patch
 ```
 
+With `certfix fix --comment-merge`, certfix keeps the validated
+comment-stripped artifacts above and adds conservative comment-merged review
+artifacts. Add `--comment-merge-audit` when you want an LLM to reject stale or
+misleading restored comments before those artifacts are written. That audit is
+an explicit opt-in path that sends original/restored comments to the configured
+review model; do not enable it for comments that must not be sent to an API
+provider.
+
+```text
+certfix-output/
++-- reports/
+|   `-- comment_merge.json
++-- fixes-commented/
+|   `-- mem30_use_after_free.fixed.commented.c
+`-- patches-commented/
+    `-- mem30_use_after_free.c.commented.patch
+```
+
 LLM output is not guaranteed to be deterministic, so exact output can vary by
 model, provider, prompt profile, runtime settings, and upstream model updates.
 See [docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) for a fuller walkthrough.
@@ -255,7 +273,9 @@ the container, runs `certfix doctor`, then runs `certfix check` only or
 | `certfix-docker local-check` | `qwen36-mtp-docker` | config, doctor, check |
 | `certfix-docker local-fix` | `qwen36-mtp-docker` | config, doctor, check, fix |
 
-Use a different bundled profile with `--profile`.
+Use a different bundled profile with `--profile`. Use `--comment-merge` or
+`--comment-merge-audit` on `api-fix` / `local-fix` when you want
+comment-merged review artifacts.
 
 ### 3.2 Raw certfix CLI
 
@@ -268,6 +288,8 @@ certfix config deepseek-v4-flash-openrouter --output .certfix.yaml
 certfix doctor
 certfix check path/to/source --output-dir certfix-output
 certfix fix path/to/source --output-dir certfix-output
+certfix fix path/to/source --output-dir certfix-output --comment-merge
+certfix fix path/to/source --output-dir certfix-output --comment-merge-audit
 ```
 
 For compiler requirements, direct `llama-server` setup, and non-Docker examples,
@@ -314,7 +336,14 @@ Use `certfix check` exit codes for CI violation gating.
 - CERT-C recommendations are not supported.
 - Analysis is file/function scoped, not whole-program semantic analysis.
 - Generated fixes are candidates for review, not guaranteed correct patches.
-- Fixed-code candidates are currently comment-stripped.
+- Fixed-code candidates under `fixes/` are comment-stripped.
+- `--comment-merge` can add review-only comment-merged artifacts after
+  validation.
+- `--comment-merge-audit` uses an LLM to suppress comment-merged artifacts when
+  restored comments appear stale or misleading.
+- `--comment-merge-audit` sends original/restored comments to the configured
+  review model and should not be used with API providers when comments are
+  sensitive.
 - API-only and hybrid modes may send source code to configured providers.
 
 See [docs/LIMITATIONS.md](docs/LIMITATIONS.md) for the full scope and runtime

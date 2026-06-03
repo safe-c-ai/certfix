@@ -91,6 +91,9 @@ collect target files
 read each file as UTF-8 source text
   │
   ▼
+preprocess comments out while preserving C string/character literals
+  │
+  ▼
 Qwen3.6 batch detection
   - binary violation/no-violation decision
   - sequential Top-2 rule candidate generation
@@ -107,11 +110,14 @@ Steps:
 
 1. Collect target `.c` and `.h` files.
 2. Read each target as UTF-8 source text.
-3. Send file text to the configured Qwen3.6 batch detection route.
-4. Run binary violation detection, rule candidate generation, and
+3. Preprocess comments out while preserving C string/character literals and line
+   structure.
+4. Send the preprocessed, comment-stripped file text to the configured Qwen3.6
+   batch detection route.
+5. Run binary violation detection, rule candidate generation, and
    3-permutation selector voting.
-5. Normalize file paths and line numbers.
-6. Write text/JSON/SARIF output and reports.
+6. Normalize file paths and line numbers.
+7. Write text/JSON/SARIF output and reports.
 
 This path is selected when:
 
@@ -137,6 +143,41 @@ profiles. It:
 
 This generic path is not the main release-default Qwen3.6 check route.
 
+### Comment Handling
+
+certfix intentionally removes C comments before LLM-facing check and fix
+processing where the pipeline uses preprocessed chunks or fixed-code candidates.
+This is not an accidental formatting loss. Comments can contain stale intent,
+incorrect explanations, disabled code fragments, or misleading rule hints, and
+LLM-backed analysis can overfit to that natural-language context instead of the
+executable C code.
+
+This policy comes from the experiment-side SFT and evaluation history. Earlier
+comment-present data made models appear stronger than they were: the model could
+learn the explanatory comment pattern or rule hint instead of the semantic
+properties of the C code. In those runs, result quality did not track code
+difficulty reliably, which made model comparisons and release decisions
+misleading. Comment removal became the release invariant to reduce shortcut
+learning and evaluation leakage.
+
+The release pipeline therefore keeps the analysis and validation path
+comment-stripped:
+
+- detection should reason over code structure and rule context, not comments;
+- repair should generate a code candidate that can be compiled and validated
+  without depending on comments;
+- validation and programmatic checks compare executable structure, not comment
+  text.
+
+When `certfix fix --comment-merge` is enabled, comment-preserving output is a
+final artifact-generation step that merges comments back onto an already
+validated comment-stripped candidate. It does not reintroduce comments into the
+LLM-facing check, repair, or validation inputs. With `--comment-merge-audit`,
+an additional LLM audit checks whether restored comments look stale or
+misleading before comment-merged artifacts are written. That audit is the only
+opt-in comment-restoration path that sends original/restored comments to a
+configured review model.
+
 ## Fix Pipeline
 
 `certfix fix` is artifact-only. It does not patch source files in place.
@@ -151,6 +192,9 @@ collect target files
   │
   ▼
 read each file as UTF-8 source text
+  │
+  ▼
+strip comments for the LLM-facing repair input
   │
   ▼
 select target rule
@@ -175,6 +219,10 @@ run validation gates
 run one validate-guided retry when enabled and retryable
   │
   ▼
+optional final comment-merged output artifact when --comment-merge is enabled
+  - optional restored-comment audit when --comment-merge-audit is enabled
+  │
+  ▼
 write reports, patches, and fixed-code candidates
 ```
 
@@ -183,13 +231,19 @@ Steps:
 1. If `--rule` is provided, use the requested rule set.
 2. Otherwise, when the configured repair profile requires a rule, run detection
    and select a target rule for the repair attempt.
-3. Send the complete source file plus rule context to the configured repair
-   backend.
-4. Extract a complete fixed-code candidate from the model output.
-5. Strip C comments from the fixed-code candidate.
-6. Run enabled validation gates.
-7. If validation fails with a retryable category, run one validate-guided retry.
-8. Write reports, patches, and fixed-code candidates under the output directory.
+3. Strip comments from the full source file for the LLM-facing repair input while
+   keeping the raw original source for artifact diffs and optional comment merge.
+4. Send the complete comment-stripped source file plus rule context to the
+   configured repair backend.
+5. Extract a complete fixed-code candidate from the model output.
+6. Strip C comments from the fixed-code candidate.
+7. Run enabled validation gates.
+8. If validation fails with a retryable category, run one validate-guided retry.
+9. When `--comment-merge` is enabled, optionally generate a comment-merged
+   output artifact after validation has already accepted the comment-stripped
+   candidate. When `--comment-merge-audit` is enabled, suppress that artifact if
+   the restored-comment audit rejects it.
+10. Write reports, patches, and fixed-code candidates under the output directory.
 
 The public Qwen3.6 profile uses:
 
@@ -245,8 +299,10 @@ environment variables take precedence over `.env`.
 - Repair is designed for one selected target rule per repair attempt. Multiple
   independent violations in the same function are not handled as one combined
   repair task.
-- Fixed-code candidates are comment-stripped. Comment-preserving repair is not
-  implemented.
+- Fixed-code candidates under `fixes/` are comment-stripped. Optional
+  `--comment-merge` artifacts are generated only after validation and are
+  review aids, not the validated candidate itself. `--comment-merge-audit`
+  audits restored comments before writing those review artifacts.
 - Source files are never modified by certfix commands.
 
 ## Exit Codes

@@ -28,8 +28,17 @@ semantic preservation, or security correctness.
 - Functions up to about 200 lines are the expected case. Results may become
   less stable above that, and functions over about 300 lines should be split
   before running certfix.
-- Fixed-code candidates are comment-stripped; comment-preserving repair
-  is not implemented.
+- Fixed-code candidates under `fixes/` are intentionally comment-stripped.
+  Comments are excluded from the LLM-facing repair path to reduce the risk of
+  stale or misleading natural-language context steering the code fix.
+- `certfix fix --comment-merge` can generate additional comment-merged review
+  artifacts after validation. This merge is conservative and may skip comments
+  when placement is ambiguous or appears to contain disabled code.
+- `--comment-merge-audit` adds an LLM audit for restored comments, but it is
+  still a review aid and not a proof that comments are complete or correct.
+- `--comment-merge-audit` sends original/restored comments to the configured
+  review model. Do not enable it with an API provider when comments contain
+  information that must stay local.
 
 ## Validation And Runtime
 

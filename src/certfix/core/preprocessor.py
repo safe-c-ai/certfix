@@ -95,6 +95,7 @@ class Preprocessor:
         result = []
         lines = code.split("\n")
         in_block_comment = False
+        state = "normal"
 
         for line in lines:
             processed_line = ""
@@ -106,9 +107,28 @@ class Preprocessor:
                         processed_line += "  "
                         i += 2
                         in_block_comment = False
+                        state = "normal"
                     else:
                         processed_line += " "
                         i += 1
+                elif state == "string":
+                    processed_line += line[i]
+                    if line[i] == "\\" and i + 1 < len(line):
+                        processed_line += line[i + 1]
+                        i += 2
+                        continue
+                    if line[i] == '"':
+                        state = "normal"
+                    i += 1
+                elif state == "char":
+                    processed_line += line[i]
+                    if line[i] == "\\" and i + 1 < len(line):
+                        processed_line += line[i + 1]
+                        i += 2
+                        continue
+                    if line[i] == "'":
+                        state = "normal"
+                    i += 1
                 elif i < len(line) - 1 and line[i : i + 2] == "/*":
                     # Start of block comment
                     processed_line += "  "
@@ -120,9 +140,15 @@ class Preprocessor:
                     break
                 else:
                     processed_line += line[i]
+                    if line[i] == '"':
+                        state = "string"
+                    elif line[i] == "'":
+                        state = "char"
                     i += 1
 
             result.append(processed_line)
+            if state in {"string", "char"}:
+                state = "normal"
 
         # Build line mapping (1:1 since we preserve line structure)
         mapping = LineMapping(

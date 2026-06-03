@@ -47,7 +47,7 @@ class TestCLI:
         result = runner.invoke(main, ["--version"])
 
         assert result.exit_code == 0
-        assert "0.3.1" in result.output
+        assert "0.4.0" in result.output
 
     def test_help(self) -> None:
         """Test --help option."""
@@ -80,6 +80,8 @@ class TestCLI:
         assert "--apply" not in result.output
         assert "--interactive" not in result.output
         assert "--verify" in result.output
+        assert "--comment-merge" in result.output
+        assert "--comment-merge-audit" in result.output
         assert "--mode" not in result.output
 
 class TestCheckCommand:
@@ -271,7 +273,10 @@ class TestCheckCommand:
         """Qwen3.6 check profile should use whole-file batch detection."""
         a_file = tmp_path / "a.c"
         b_file = tmp_path / "b.c"
-        a_file.write_text("int x;")
+        a_file.write_text(
+            'printf("http://example.com/a/*not-comment*/b"); '
+            "// comment rule hint should be stripped\n"
+        )
         b_file.write_text("int y;")
 
         violation = Violation(
@@ -302,7 +307,10 @@ class TestCheckCommand:
 
         assert result.exit_code == 1
         backend.detect_qwen36_batch.assert_called_once()
-        _items, kwargs = backend.detect_qwen36_batch.call_args
+        args, kwargs = backend.detect_qwen36_batch.call_args
+        items = args[0]
+        assert "comment rule hint" not in items[0][1]
+        assert '"http://example.com/a/*not-comment*/b"' in items[0][1]
         assert kwargs["batch_size"] == 2
         mock_det_cls.return_value.check_directory.assert_not_called()
 
@@ -391,7 +399,7 @@ class TestDoctorCommand:
         assert result.exit_code == 0
         assert "Python:" in result.output
         assert "certfix:" in result.output
-        assert "0.3.1" in result.output
+        assert "0.4.0" in result.output
 
     def test_doctor_omits_removed_llama_cpp_status(self) -> None:
         """Doctor should not advertise the removed in-process llama.cpp backend."""
@@ -578,7 +586,13 @@ class TestFixCommand:
     def test_fix_simple_mode_uses_direct_repair_role(self, tmp_path: Path) -> None:
         """simple mode should run the configured direct repair role."""
         c_file = tmp_path / "vuln.c"
-        c_file.write_text('char *p = malloc(10);\nfree(p);\nprintf("%s", p);\n')
+        c_file.write_text(
+            'char *p = malloc(10);\n'
+            "// stale hint: MEM30-C use-after-free\n"
+            "free(p);\n"
+            'printf("%s", p);\n',
+            encoding="utf-8",
+        )
         cfg = _make_role_setup_config(tmp_path)
         backend = _mock_fix_backend()
         backend.generate.return_value = """DECISION: APPLY_FIX
@@ -623,6 +637,10 @@ free(p);
             )
 
         assert result.exit_code == 0
+        prompt = backend.generate.call_args.args[0]
+        assert "stale hint" not in prompt
+        assert "stale hint" not in mock_removal.call_args.kwargs["original_code"]
+        assert "stale hint" not in mock_semantic.call_args.kwargs["original_code"]
         data = json.loads(result.output)
         assert data["fixes"][0]["rule_id"] == "MEM30-C"
         assert data["fixes"][0]["status"] == FinalFixStatus.FIXED.value
@@ -632,9 +650,13 @@ free(p);
         assert (output_dir / "reports" / "fixes.sarif").exists()
         assert (output_dir / "reports" / "summary.json").exists()
         assert (output_dir / "fixes" / "vuln.fixed.c").exists()
-        assert (output_dir / "patches" / "vuln.c.patch").exists()
+        patch_text = (output_dir / "patches" / "vuln.c.patch").read_text(encoding="utf-8")
+        assert "// stale hint: MEM30-C use-after-free" in patch_text
         assert c_file.read_text(encoding="utf-8") == (
-            'char *p = malloc(10);\nfree(p);\nprintf("%s", p);\n'
+            'char *p = malloc(10);\n'
+            "// stale hint: MEM30-C use-after-free\n"
+            "free(p);\n"
+            'printf("%s", p);\n'
         )
         mock_compile.assert_called_once()
         mock_removal.assert_called_once()
@@ -658,6 +680,224 @@ free(p);
 
         assert result.exit_code == 0
         assert "No fix candidates generated" in result.output
+
+    def test_fix_comment_merge_writes_additional_artifacts(self, tmp_path: Path) -> None:
+        """--comment-merge should add review-only commented artifacts."""
+        c_file = tmp_path / "vuln.c"
+        c_file.write_text(
+            """/* owner note */
+char *p = malloc(10);
+printf("start"); // stable output
+free(p);
+printf("%s", p);
+""",
+            encoding="utf-8",
+        )
+        cfg = _make_role_setup_config(tmp_path)
+        backend = _mock_fix_backend()
+        backend.generate.return_value = """DECISION: APPLY_FIX
+RULE: MEM30-C
+LINE: 5
+EVIDENCE: p is used after free
+```c
+char *p = malloc(10);
+printf("start");
+printf("%s", p);
+free(p);
+```
+"""
+
+        runner = CliRunner()
+        with (
+            patch(_PATCH_CONFIG_LOAD, return_value=cfg),
+            patch(_PATCH_ROLE_BACKEND_FACTORY, return_value=backend),
+            patch("certfix.core.validation.run_compile_check") as mock_compile,
+            patch("certfix.core.validation.run_violation_removal_check") as mock_removal,
+            patch("certfix.core.validation.run_semantic_auto_apply_check") as mock_semantic,
+        ):
+            mock_compile.return_value = CompileCheckResult(True, ["gcc"], 0)
+            mock_removal.return_value = ViolationRemovalResult(
+                removed=True,
+                target_rule_id="MEM30-C",
+                remaining_violations=[],
+                method="non_target_advisory",
+            )
+            mock_semantic.return_value = SemanticAutoApplyResult(
+                parse_ok=True,
+                auto_apply_ok=True,
+                behavior_preserved=True,
+                material_behavior_delta=False,
+                uncertain_material_behavior=False,
+                fail_type="none",
+                confidence="high",
+            )
+
+            result = runner.invoke(main, ["fix", "--comment-merge", str(c_file)])
+
+        assert result.exit_code == 0
+        output_dir = tmp_path / "certfix-output"
+        fixed = output_dir / "fixes" / "vuln.fixed.c"
+        commented = output_dir / "fixes-commented" / "vuln.fixed.commented.c"
+        commented_patch = output_dir / "patches-commented" / "vuln.c.commented.patch"
+        report_path = output_dir / "reports" / "comment_merge.json"
+
+        assert fixed.exists()
+        assert commented.exists()
+        assert commented_patch.exists()
+        assert report_path.exists()
+        assert "owner note" not in fixed.read_text(encoding="utf-8")
+
+        commented_text = commented.read_text(encoding="utf-8")
+        assert "/* owner note */" in commented_text
+        assert 'printf("start"); // stable output' in commented_text
+        assert 'printf("%s", p);' in commented_text
+        assert "free(p);" in commented_text
+
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        assert report["kind"] == "comment_merge"
+        assert report["merged"] == 1
+        assert report["items"][0]["status"] == "merged"
+
+    def test_fix_comment_merge_audit_blocks_commented_artifact(self, tmp_path: Path) -> None:
+        """--comment-merge-audit should suppress artifacts when audit rejects comments."""
+        c_file = tmp_path / "vuln.c"
+        c_file.write_text(
+            """char *p = malloc(10);
+printf("start"); // stale old behavior
+free(p);
+printf("%s", p);
+""",
+            encoding="utf-8",
+        )
+        cfg = _make_role_setup_config(tmp_path)
+        backend = _mock_fix_backend()
+        backend.generate.side_effect = [
+            """DECISION: APPLY_FIX
+RULE: MEM30-C
+LINE: 4
+EVIDENCE: p is used after free
+```c
+char *p = malloc(10);
+printf("start");
+printf("%s", p);
+free(p);
+```
+""",
+            """
+{
+  "audit_ok": false,
+  "comments_consistent": false,
+  "disabled_code_restored": false,
+  "misleading_comments": ["stale old behavior"],
+  "confidence": "high",
+  "reason": "comment is stale"
+}
+""",
+        ]
+
+        runner = CliRunner()
+        with (
+            patch(_PATCH_CONFIG_LOAD, return_value=cfg),
+            patch(_PATCH_ROLE_BACKEND_FACTORY, return_value=backend),
+            patch("certfix.core.validation.run_compile_check") as mock_compile,
+            patch("certfix.core.validation.run_violation_removal_check") as mock_removal,
+            patch("certfix.core.validation.run_semantic_auto_apply_check") as mock_semantic,
+        ):
+            mock_compile.return_value = CompileCheckResult(True, ["gcc"], 0)
+            mock_removal.return_value = ViolationRemovalResult(
+                removed=True,
+                target_rule_id="MEM30-C",
+                remaining_violations=[],
+                method="non_target_advisory",
+            )
+            mock_semantic.return_value = SemanticAutoApplyResult(
+                parse_ok=True,
+                auto_apply_ok=True,
+                behavior_preserved=True,
+                material_behavior_delta=False,
+                uncertain_material_behavior=False,
+                fail_type="none",
+                confidence="high",
+            )
+
+            result = runner.invoke(main, ["fix", "--comment-merge-audit", str(c_file)])
+
+        assert result.exit_code == 0
+        output_dir = tmp_path / "certfix-output"
+        report = json.loads(
+            (output_dir / "reports" / "comment_merge.json").read_text(encoding="utf-8")
+        )
+        assert report["merged"] == 0
+        assert report["items"][0]["status"] == "skipped_audit_failed"
+        assert report["items"][0]["audit"]["audit_ok"] is False
+        assert not (output_dir / "fixes-commented" / "vuln.fixed.commented.c").exists()
+
+    def test_fix_comment_merge_audit_error_keeps_standard_artifacts(self, tmp_path: Path) -> None:
+        """Audit backend errors should suppress only comment-merged artifacts."""
+        c_file = tmp_path / "vuln.c"
+        c_file.write_text(
+            """char *p = malloc(10);
+printf("start"); // stable output
+free(p);
+printf("%s", p);
+""",
+            encoding="utf-8",
+        )
+        cfg = _make_role_setup_config(tmp_path)
+        backend = _mock_fix_backend()
+        backend.generate.side_effect = [
+            """DECISION: APPLY_FIX
+RULE: MEM30-C
+LINE: 4
+EVIDENCE: p is used after free
+```c
+char *p = malloc(10);
+printf("start");
+printf("%s", p);
+free(p);
+```
+""",
+            RuntimeError("audit unavailable"),
+        ]
+
+        runner = CliRunner()
+        with (
+            patch(_PATCH_CONFIG_LOAD, return_value=cfg),
+            patch(_PATCH_ROLE_BACKEND_FACTORY, return_value=backend),
+            patch("certfix.core.validation.run_compile_check") as mock_compile,
+            patch("certfix.core.validation.run_violation_removal_check") as mock_removal,
+            patch("certfix.core.validation.run_semantic_auto_apply_check") as mock_semantic,
+        ):
+            mock_compile.return_value = CompileCheckResult(True, ["gcc"], 0)
+            mock_removal.return_value = ViolationRemovalResult(
+                removed=True,
+                target_rule_id="MEM30-C",
+                remaining_violations=[],
+                method="non_target_advisory",
+            )
+            mock_semantic.return_value = SemanticAutoApplyResult(
+                parse_ok=True,
+                auto_apply_ok=True,
+                behavior_preserved=True,
+                material_behavior_delta=False,
+                uncertain_material_behavior=False,
+                fail_type="none",
+                confidence="high",
+            )
+
+            result = runner.invoke(main, ["fix", "--comment-merge-audit", str(c_file)])
+
+        assert result.exit_code == 0
+        output_dir = tmp_path / "certfix-output"
+        assert (output_dir / "fixes" / "vuln.fixed.c").exists()
+        assert (output_dir / "patches" / "vuln.c.patch").exists()
+        report = json.loads(
+            (output_dir / "reports" / "comment_merge.json").read_text(encoding="utf-8")
+        )
+        assert report["merged"] == 0
+        assert report["items"][0]["status"] == "skipped_audit_error"
+        assert "audit unavailable" in report["items"][0]["reason"]
+        assert not (output_dir / "fixes-commented" / "vuln.fixed.commented.c").exists()
 
     def test_fix_simple_code_only_profile_detects_rule_when_not_provided(
         self,

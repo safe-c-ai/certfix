@@ -166,7 +166,7 @@ def test_classify_prefers_validator_result() -> None:
 
 def test_run_validate_guided_retry_generates_retry_candidate() -> None:
     backend = MagicMock()
-    backend.generate.return_value = "int x; char *p = NULL;"
+    backend.generate.return_value = "int x; /* stale comment */ char *p = NULL;"
 
     retry = run_validate_guided_retry(
         primary=_primary(),
@@ -179,7 +179,8 @@ def test_run_validate_guided_retry_generates_retry_candidate() -> None:
     assert retry.success is True
     assert retry.source == "retry"
     assert retry.retry_count == 1
-    assert retry.fixed_code == "int x; char *p = NULL;"
+    assert retry.fixed_code == "int x;  char *p = NULL;"
+    assert "stale comment" not in retry.fixed_code
     assert retry.retry_metadata["failure_category"] == "compile_error"
     assert retry.retry_metadata["rule_addendum_id"] == "qwen36_retry_rule_addenda_v1"
     backend.generate.assert_called_once()

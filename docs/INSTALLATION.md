@@ -132,7 +132,10 @@ run the bundled examples.
 The commands below write results to `examples/certfix-output`. Source files are
 not modified. `certfix check` writes reports, and `certfix fix` writes
 comment-stripped fixed-code candidates under `fixes/` plus patches under
-`patches/`.
+`patches/`. Add `--comment-merge` to `certfix fix` when you also want
+review-only comment-merged artifacts, or `--comment-merge-audit` when you want
+an LLM to audit restored comments before writing those artifacts. The audit
+sends original/restored comments to the configured review model.
 
 ### API Only
 

@@ -6,6 +6,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from certfix.core.simple_repair import strip_c_comments
 from certfix.inference.base import InferenceBackend
 from certfix.inference.parsing import extract_fixed_code
 from certfix.models import FinalFixStatus, FixResult, SemanticVerdict
@@ -243,7 +244,7 @@ def run_validate_guided_retry(
         enabled_rule_addenda=enabled_rule_addenda,
     )
     output = backend.generate(prompt, max_tokens=max_tokens, temperature=0.0)
-    fixed_code = _extract_retry_code(output)
+    fixed_code = strip_c_comments(_extract_retry_code(output))
     if not fixed_code:
         return None
 
@@ -254,6 +255,7 @@ def run_validate_guided_retry(
         success=True,
         source="retry",
         retry_count=primary.retry_count + 1,
+        artifact_original_code=primary.artifact_original_code,
         retry_metadata={
             "runtime_label": "retry_on_budget1024",
             "reasoning": "on",
@@ -275,4 +277,4 @@ def _extract_retry_code(output: str) -> str:
         cleaned,
         flags=re.DOTALL,
     ).strip()
-    return extract_fixed_code(cleaned)
+    return str(extract_fixed_code(cleaned))

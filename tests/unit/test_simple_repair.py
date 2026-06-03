@@ -6,6 +6,7 @@ from certfix.core.simple_repair import (
     parse_code_only_repair,
     parse_simple_repair,
     run_simple_repair,
+    strip_c_comments,
 )
 
 
@@ -42,9 +43,15 @@ void f(void) {
 
     result = parse_simple_repair(output)
 
-    assert result.fixed_code == "void f(void) {\n\n    puts(p);\n    free(p);\n}"
+    assert "puts(p);" in result.fixed_code
+    assert "free(p);" in result.fixed_code
     assert "violation comment" not in result.fixed_code
     assert "print before free" not in result.fixed_code
+
+
+def test_strip_c_comments_preserves_block_comment_token_separation() -> None:
+    assert strip_c_comments("int/*x*/y;") == "int y;"
+    assert strip_c_comments("a/**/b;") == "a b;"
 
 
 def test_parse_simple_apply_fix_keeps_comment_markers_inside_strings() -> None:

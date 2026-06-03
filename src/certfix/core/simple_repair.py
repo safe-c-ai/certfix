@@ -165,7 +165,7 @@ def _extract_simple_fixed_code(output: str) -> str:
             if not _is_placeholder_code(code):
                 return code
         return ""
-    return extract_fixed_code(output)
+    return str(extract_fixed_code(output))
 
 
 def _is_placeholder_code(code: str) -> bool:
@@ -185,10 +185,12 @@ def _strip_c_comments(code: str) -> str:
 
         if state == "normal":
             if ch == "/" and nxt == "/":
+                _append_separator_space(result)
                 state = "line_comment"
                 i += 2
                 continue
             if ch == "/" and nxt == "*":
+                _append_separator_space(result)
                 state = "block_comment"
                 i += 2
                 continue
@@ -242,3 +244,13 @@ def _strip_c_comments(code: str) -> str:
             continue
 
     return "\n".join(line.rstrip() for line in "".join(result).splitlines()).strip()
+
+
+def strip_c_comments(code: str) -> str:
+    """Public helper for removing C comments before LLM-facing repair steps."""
+    return _strip_c_comments(code)
+
+
+def _append_separator_space(result: list[str]) -> None:
+    if result and not result[-1].isspace():
+        result.append(" ")

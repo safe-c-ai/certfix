@@ -62,6 +62,19 @@ def test_api_check_generates_profile_then_runs_doctor_and_check(tmp_path: Path) 
     ]
 
 
+def test_comment_merge_options_are_fix_only() -> None:
+    runner = CliRunner()
+
+    check_help = runner.invoke(main, ["api-check", "--help"])
+    fix_help = runner.invoke(main, ["api-fix", "--help"])
+
+    assert check_help.exit_code == 0
+    assert "--comment-merge" not in check_help.output
+    assert fix_help.exit_code == 0
+    assert "--comment-merge" in fix_help.output
+    assert "--comment-merge-audit" in fix_help.output
+
+
 def test_api_fix_continues_after_check_finds_violations(tmp_path: Path) -> None:
     input_dir = tmp_path / "input"
     output_dir = tmp_path / "output"
@@ -104,6 +117,37 @@ def test_api_fix_continues_after_check_finds_violations(tmp_path: Path) -> None:
         "--output-dir",
         str(output_dir),
     ]
+
+
+def test_api_fix_passes_comment_merge_options(tmp_path: Path) -> None:
+    input_dir = tmp_path / "input"
+    output_dir = tmp_path / "output"
+    config_path = tmp_path / "certfix.yaml"
+    input_dir.mkdir()
+
+    runner = CliRunner()
+    with patch(
+        "certfix.docker_wrapper.subprocess.run",
+        side_effect=[_completed(0), _completed(0), _completed(1), _completed(0)],
+    ) as run:
+        result = runner.invoke(
+            main,
+            [
+                "api-fix",
+                "--comment-merge-audit",
+                "--input",
+                str(input_dir),
+                "--output",
+                str(output_dir),
+                "--config",
+                str(config_path),
+            ],
+        )
+
+    assert result.exit_code == 0
+    fix_command = _command_args(run.call_args_list)[3]
+    assert "--comment-merge" in fix_command
+    assert "--comment-merge-audit" in fix_command
 
 
 def test_local_fix_uses_docker_qwen_profile(tmp_path: Path) -> None:

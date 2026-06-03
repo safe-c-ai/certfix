@@ -68,6 +68,22 @@ examples/certfix-output/
     `-- mem30_use_after_free.c.patch
 ```
 
+With `certfix fix --comment-merge`, certfix keeps the validated
+comment-stripped candidate under `fixes/` and adds review-only comment-merged
+artifacts. Use `--comment-merge-audit` when you also want an LLM to suppress
+stale or misleading restored comments before those artifacts are written. That
+audit sends original/restored comments to the configured review model.
+
+```text
+examples/certfix-output/
+|-- reports/
+|   `-- comment_merge.json
+|-- fixes-commented/
+|   `-- mem30_use_after_free.fixed.commented.c
+`-- patches-commented/
+    `-- mem30_use_after_free.c.commented.patch
+```
+
 One possible fixed-code candidate is:
 
 ```c

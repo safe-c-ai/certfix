@@ -170,11 +170,17 @@ def _run_qwen36_batch_check(
     cfg: Config,
 ) -> CheckResult:
     """Run whole-file batched Qwen3.6 check."""
+    from certfix.core.preprocessor import Preprocessor
+
     files = _collect_check_files(target, cfg.check.exclude or None)
     if not files:
         return CheckResult(files_checked=0, violations=[])
 
-    items = [(str(index), path.read_text(encoding="utf-8")) for index, path in enumerate(files)]
+    preprocessor = Preprocessor()
+    items = []
+    for index, path in enumerate(files):
+        processed, _mapping, _ignored = preprocessor.process(path.read_text(encoding="utf-8"))
+        items.append((str(index), processed))
     batch_detect = backend.detect_qwen36_batch  # type: ignore[attr-defined]
     batch_results = batch_detect(items, rules=rules, batch_size=cfg.detection.batch_size)
 
@@ -216,6 +222,16 @@ def _collect_check_files(target: Path, exclude: list[str] | None = None) -> list
     help="Write fixed files and reports to this directory",
 )
 @click.option("--verify", is_flag=True, help="Verify fixes with compiler")
+@click.option(
+    "--comment-merge",
+    is_flag=True,
+    help="Write optional comment-merged fixed-code artifacts after validation",
+)
+@click.option(
+    "--comment-merge-audit",
+    is_flag=True,
+    help="LLM-audit comment-merged artifacts before writing them",
+)
 @click.option("--cflags", help="Compiler flags for verification")
 @click.option("--threads", "-t", type=int, default=None, help="Number of CPU threads")
 @click.option("--timeout", type=int, default=300, help="Inference timeout in seconds")
@@ -228,6 +244,8 @@ def fix(
     rule: tuple[str, ...],
     output_dir: str | None,
     verify: bool,
+    comment_merge: bool,
+    comment_merge_audit: bool,
     cflags: str | None,
     threads: int | None,
     timeout: int,
@@ -251,6 +269,8 @@ def fix(
             output_dir=Path(output_dir) if output_dir else None,
             output_format=output_format,
             verify=verify,
+            comment_merge=comment_merge,
+            comment_merge_audit=comment_merge_audit,
             cflags=cflags,
             threads=threads,
             timeout=timeout,
@@ -346,6 +366,8 @@ def _run_simple_fix_command(
     output_dir: Path | None,
     output_format: str,
     verify: bool,
+    comment_merge: bool,
+    comment_merge_audit: bool,
     cflags: str | None,
     threads: int | None,
     timeout: int,
@@ -354,11 +376,12 @@ def _run_simple_fix_command(
 ) -> None:
     """Run the release-default fixed-code candidate generation path."""
     from certfix.core import Fixer
-    from certfix.core.simple_repair import run_simple_repair
+    from certfix.core.simple_repair import run_simple_repair, strip_c_comments
     from certfix.inference.factory import create_role_backend
     from certfix.output import get_formatter
 
     artifacts_dir = _resolve_output_dir(path, output_dir)
+    comment_merge = comment_merge or comment_merge_audit
     role_name = cfg.step_role(
         "fix_generation",
         cfg.fix.simple_repairer_role or cfg.validation.semantic.reviewer_role,
@@ -474,7 +497,8 @@ def _run_simple_fix_command(
     try:
         for target in files:
             fix_item_started = time.perf_counter()
-            code = target.read_text(encoding="utf-8")
+            raw_code = target.read_text(encoding="utf-8")
+            code = strip_c_comments(raw_code)
             repair_rules = list(rules or [])
             if not repair_rules and detection_backend is not None and detector is not None:
                 detect_started = time.perf_counter()
@@ -500,6 +524,7 @@ def _run_simple_fix_command(
             if fix_result is None:
                 continue
 
+            fix_result.artifact_original_code = raw_code
             fix_result.source = "primary"
             if detection_backend is not None:
                 fix_result.timings["simple_detection_seconds"] = (
@@ -534,6 +559,53 @@ def _run_simple_fix_command(
 
             fix_result.timings["fix_item_total_seconds"] = time.perf_counter() - fix_item_started
             fixes.append(fix_result)
+
+        comment_merge_audit_backend = semantic_backend if comment_merge_audit else None
+        if comment_merge_audit and comment_merge_audit_backend is None:
+            comment_merge_audit_backend = backend
+
+        if not fixes:
+            _write_fix_artifacts(
+                [],
+                path,
+                artifacts_dir,
+                comment_merge=comment_merge,
+                comment_merge_audit_backend=comment_merge_audit_backend,
+                comment_merge_audit_max_tokens=_step_max_tokens(
+                    cfg,
+                    "semantic_check",
+                    cfg.validation.semantic.reviewer_role,
+                ),
+            )
+            if not quiet and output_format == "text":
+                stderr.print(f"Fix reports written to {artifacts_dir / 'reports'}")
+            if not quiet:
+                stderr.print("[green]No fix candidates generated.[/green]")
+            sys.exit(0)
+
+        _write_fix_artifacts(
+            fixes,
+            path,
+            artifacts_dir,
+            comment_merge=comment_merge,
+            comment_merge_audit_backend=comment_merge_audit_backend,
+            comment_merge_audit_max_tokens=_step_max_tokens(
+                cfg,
+                "semantic_check",
+                cfg.validation.semantic.reviewer_role,
+            ),
+        )
+        if not quiet and output_format == "text":
+            stderr.print(f"Fix artifacts written to {artifacts_dir}")
+
+        output_buf = io.StringIO()
+        formatter = get_formatter(output_format, output_buf)
+        formatter.format_fixes(fixes)
+        click.echo(output_buf.getvalue(), nl=False)
+
+        if any(not f.success for f in fixes):
+            sys.exit(1)
+        sys.exit(0)
     finally:
         _release_backends(
             retry_violation_audit_backend,
@@ -546,27 +618,6 @@ def _run_simple_fix_command(
             semantic_backend,
             backend,
         )
-
-    if not fixes:
-        _write_fix_artifacts([], path, artifacts_dir)
-        if not quiet and output_format == "text":
-            stderr.print(f"Fix reports written to {artifacts_dir / 'reports'}")
-        if not quiet:
-            stderr.print("[green]No fix candidates generated.[/green]")
-        sys.exit(0)
-
-    _write_fix_artifacts(fixes, path, artifacts_dir)
-    if not quiet and output_format == "text":
-        stderr.print(f"Fix artifacts written to {artifacts_dir}")
-
-    output_buf = io.StringIO()
-    formatter = get_formatter(output_format, output_buf)
-    formatter.format_fixes(fixes)
-    click.echo(output_buf.getvalue(), nl=False)
-
-    if any(not f.success for f in fixes):
-        sys.exit(1)
-    sys.exit(0)
 
 
 def _fix_target_files(path: Path, exclude: list[str] | None) -> list[Path]:
@@ -616,16 +667,38 @@ def _write_check_artifacts(result: CheckResult, output_dir: Path) -> None:
     )
 
 
-def _write_fix_artifacts(fixes: list[FixResult], target: Path, output_dir: Path) -> None:
+def _write_fix_artifacts(
+    fixes: list[FixResult],
+    target: Path,
+    output_dir: Path,
+    *,
+    comment_merge: bool = False,
+    comment_merge_audit_backend: InferenceBackend | None = None,
+    comment_merge_audit_max_tokens: int = 1024,
+) -> None:
     """Write fixed candidates and reports without changing source files."""
+    from certfix.core.comment_merge import (
+        audit_comment_merge,
+        comment_merged_diff,
+        merge_comments,
+    )
     from certfix.output import JsonFormatter, SarifFormatter
 
     reports_dir = output_dir / "reports"
     fixes_dir = output_dir / "fixes"
     patches_dir = output_dir / "patches"
+    commented_fixes_dir = output_dir / "fixes-commented"
+    commented_patches_dir = output_dir / "patches-commented"
     reports_dir.mkdir(parents=True, exist_ok=True)
     fixes_dir.mkdir(parents=True, exist_ok=True)
     patches_dir.mkdir(parents=True, exist_ok=True)
+    if comment_merge:
+        commented_fixes_dir.mkdir(parents=True, exist_ok=True)
+        commented_patches_dir.mkdir(parents=True, exist_ok=True)
+
+    for fix in fixes:
+        if fix.success and fix.artifact_original_code is None:
+            fix.artifact_original_code = _read_raw_original_for_artifact(fix)
 
     json_buf = io.StringIO()
     JsonFormatter(json_buf).format_fixes(fixes)
@@ -637,9 +710,19 @@ def _write_fix_artifacts(fixes: list[FixResult], target: Path, output_dir: Path)
 
     fixed_files: list[str] = []
     patch_files: list[str] = []
+    comment_merge_reports: list[dict[str, object]] = []
     base_dir = target if target.is_dir() else target.parent
     for fix in fixes:
         if not fix.success:
+            if comment_merge:
+                comment_merge_reports.append(
+                    {
+                        "source": fix.violation.file_path,
+                        "success": False,
+                        "status": "skipped_failed_fix",
+                        "reason": "fix candidate did not pass validation",
+                    }
+                )
             continue
         source_path = Path(fix.violation.file_path)
         rel_source = _relative_artifact_source(source_path, base_dir)
@@ -654,6 +737,58 @@ def _write_fix_artifacts(fixes: list[FixResult], target: Path, output_dir: Path)
         patch_path.write_text(fix.to_diff(), encoding="utf-8")
         patch_files.append(str(patch_path))
 
+        if comment_merge:
+            raw_original_code = fix.artifact_original_code or fix.original_code
+            merge_result = merge_comments(raw_original_code, fix.fixed_code)
+            report = merge_result.to_dict()
+            report["source"] = fix.violation.file_path
+            if merge_result.success:
+                if comment_merge_audit_backend is not None:
+                    try:
+                        audit_result = audit_comment_merge(
+                            original_code=raw_original_code,
+                            fixed_code=fix.fixed_code,
+                            merged_code=merge_result.merged_code,
+                            backend=comment_merge_audit_backend,
+                            max_tokens=comment_merge_audit_max_tokens,
+                        )
+                    except Exception as exc:
+                        report["success"] = False
+                        report["status"] = "skipped_audit_error"
+                        report["reason"] = f"comment-merge audit failed: {exc}"
+                        comment_merge_reports.append(report)
+                        continue
+                    report["audit"] = audit_result.to_dict()
+                    if not audit_result.audit_ok:
+                        report["success"] = False
+                        report["status"] = "skipped_audit_failed"
+                        report["reason"] = audit_result.reason
+                        comment_merge_reports.append(report)
+                        continue
+                commented_fixed_path = _commented_fixed_artifact_path(
+                    commented_fixes_dir,
+                    rel_source,
+                )
+                commented_fixed_path.parent.mkdir(parents=True, exist_ok=True)
+                commented_fixed_path.write_text(merge_result.merged_code, encoding="utf-8")
+
+                commented_patch_path = _commented_patch_artifact_path(
+                    commented_patches_dir,
+                    rel_source,
+                )
+                commented_patch_path.parent.mkdir(parents=True, exist_ok=True)
+                commented_patch_path.write_text(
+                    comment_merged_diff(
+                        raw_original_code,
+                        merge_result.merged_code,
+                        fix.violation.file_path,
+                    ),
+                    encoding="utf-8",
+                )
+                report["commented_fixed_file"] = str(commented_fixed_path)
+                report["commented_patch_file"] = str(commented_patch_path)
+            comment_merge_reports.append(report)
+
     summary = {
         "kind": "fix",
         "total": len(fixes),
@@ -666,6 +801,20 @@ def _write_fix_artifacts(fixes: list[FixResult], target: Path, output_dir: Path)
         json.dumps(summary, indent=2) + "\n",
         encoding="utf-8",
     )
+    if comment_merge:
+        comment_merge_summary = {
+            "kind": "comment_merge",
+            "total": len(comment_merge_reports),
+            "merged": sum(1 for report in comment_merge_reports if report.get("success")),
+            "skipped": sum(
+                1 for report in comment_merge_reports if not report.get("success")
+            ),
+            "items": comment_merge_reports,
+        }
+        (reports_dir / "comment_merge.json").write_text(
+            json.dumps(comment_merge_summary, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
 
 def _relative_artifact_source(source_path: Path, base_dir: Path) -> Path:
@@ -674,6 +823,14 @@ def _relative_artifact_source(source_path: Path, base_dir: Path) -> Path:
         return source_path.resolve().relative_to(base_dir.resolve())
     except ValueError:
         return Path(source_path.name)
+
+
+def _read_raw_original_for_artifact(fix: FixResult) -> str:
+    """Read raw source for artifact diffs; fall back to validation input."""
+    try:
+        return Path(fix.violation.file_path).read_text(encoding="utf-8")
+    except OSError:
+        return fix.original_code
 
 
 def _fixed_artifact_path(root: Path, rel_source: Path) -> Path:
@@ -686,6 +843,22 @@ def _fixed_artifact_path(root: Path, rel_source: Path) -> Path:
 def _patch_artifact_path(root: Path, rel_source: Path) -> Path:
     """Return the patch artifact path for a source-relative path."""
     return root / rel_source.parent / f"{rel_source.name}.patch"
+
+
+def _commented_fixed_artifact_path(root: Path, rel_source: Path) -> Path:
+    """Return the comment-merged fixed-code artifact path."""
+    suffix = rel_source.suffix
+    fixed_name = (
+        f"{rel_source.stem}.fixed.commented{suffix}"
+        if suffix
+        else f"{rel_source.name}.fixed.commented"
+    )
+    return root / rel_source.parent / fixed_name
+
+
+def _commented_patch_artifact_path(root: Path, rel_source: Path) -> Path:
+    """Return the comment-merged patch artifact path."""
+    return root / rel_source.parent / f"{rel_source.name}.commented.patch"
 
 
 def _is_v2_fix_validation_enabled(cfg: Config) -> bool:

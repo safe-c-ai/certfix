@@ -1,5 +1,50 @@
 # certfix Release Notes
 
+## certfix 0.4.0
+
+Minor release focused on optional comment-merged review artifacts while keeping
+the LLM-facing analysis, repair, validation, and retry paths comment-stripped.
+
+### Changes
+
+- Added `certfix fix --comment-merge` to generate additional review-only
+  comment-restored fixed-code candidates under `fixes-commented/` and
+  comment-restored patches under `patches-commented/`.
+- Added `certfix fix --comment-merge-audit`, an opt-in review-model audit that
+  suppresses comment-merged artifacts when restored comments look stale,
+  misleading, or code-like.
+- Added `reports/comment_merge.json` to record comment merge decisions, skipped
+  comments, and audit outcomes.
+- Added Docker helper support for comment merge options on `api-fix` and
+  `local-fix`.
+- Kept `fixes/` and `patches/` as the existing comment-stripped, validation-first
+  artifacts; comment-merged files are additive review artifacts.
+- Strengthened comment stripping so LLM-facing inputs preserve C string/character
+  literals and treat comments as token separators instead of merging adjacent C
+  tokens.
+- Updated the preprocessor so Qwen3.6 batch detection receives comment-stripped
+  text without corrupting `//` or `/* ... */` inside string and character
+  literals.
+- Hardened comment-merge placement rules for changed lines, duplicate anchors,
+  block-boundary anchors such as `} else {`, and commented-out-code-like
+  comments.
+- Hardened comment-merge audit parsing so malformed booleans, malformed
+  `misleading_comments`, unknown confidence values, and audit backend errors
+  fail safely.
+- Documented why certfix intentionally strips comments before LLM-facing
+  processing, and documented that `--comment-merge-audit` sends original/restored
+  comments to the configured review model.
+
+### Compatibility
+
+- No new runtime dependency is required.
+- Existing `check` and `fix` behavior remains available without the new
+  comment-merge flags.
+- Existing `fixes/`, `patches/`, JSON, and SARIF artifacts remain present.
+- `--comment-merge` and `--comment-merge-audit` are opt-in and only affect
+  additional review artifacts.
+- Source files are still not modified by certfix.
+
 ## certfix 0.3.1
 
 Patch release focused on Docker documentation reproducibility and release
