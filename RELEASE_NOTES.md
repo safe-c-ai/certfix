@@ -1,5 +1,25 @@
 # certfix Release Notes
 
+## certfix 0.4.1
+
+Patch release focused on documentation clarity for the v0.4 comment-merge
+workflow.
+
+### Changes
+
+- Clarified that `--comment-merge-audit` sends the source file's original
+  comments and the restored comments to the configured review model.
+- Clarified `certfix-docker --profile` usage in the README helper command
+  section.
+- Updated user-facing Docker examples and Compose defaults to the numbered
+  `ghcr.io/safe-c-ai/certfix:0.4.1` image tag.
+
+### Compatibility
+
+- No runtime dependency changes.
+- No CLI behavior changes.
+- This release is documentation and metadata polish only.
+
 ## certfix 0.4.0
 
 Minor release focused on optional comment-merged review artifacts while keeping
@@ -32,8 +52,8 @@ the LLM-facing analysis, repair, validation, and retry paths comment-stripped.
   `misleading_comments`, unknown confidence values, and audit backend errors
   fail safely.
 - Documented why certfix intentionally strips comments before LLM-facing
-  processing, and documented that `--comment-merge-audit` sends original/restored
-  comments to the configured review model.
+  processing, and documented that `--comment-merge-audit` sends original and
+  restored comments to the configured review model.
 
 ### Compatibility
 

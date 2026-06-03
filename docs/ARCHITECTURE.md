@@ -175,8 +175,8 @@ validated comment-stripped candidate. It does not reintroduce comments into the
 LLM-facing check, repair, or validation inputs. With `--comment-merge-audit`,
 an additional LLM audit checks whether restored comments look stale or
 misleading before comment-merged artifacts are written. That audit is the only
-opt-in comment-restoration path that sends original/restored comments to a
-configured review model.
+opt-in comment-restoration path that sends the source file's original comments
+and the restored comments to a configured review model.
 
 ## Fix Pipeline
 

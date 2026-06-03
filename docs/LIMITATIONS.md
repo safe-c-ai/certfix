@@ -36,9 +36,9 @@ semantic preservation, or security correctness.
   when placement is ambiguous or appears to contain disabled code.
 - `--comment-merge-audit` adds an LLM audit for restored comments, but it is
   still a review aid and not a proof that comments are complete or correct.
-- `--comment-merge-audit` sends original/restored comments to the configured
-  review model. Do not enable it with an API provider when comments contain
-  information that must stay local.
+- `--comment-merge-audit` sends the source file's original comments and the
+  restored comments to the configured review model. Do not enable it with an API
+  provider when comments contain information that must stay local.
 
 ## Validation And Runtime
 

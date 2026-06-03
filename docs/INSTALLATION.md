@@ -135,7 +135,8 @@ comment-stripped fixed-code candidates under `fixes/` plus patches under
 `patches/`. Add `--comment-merge` to `certfix fix` when you also want
 review-only comment-merged artifacts, or `--comment-merge-audit` when you want
 an LLM to audit restored comments before writing those artifacts. The audit
-sends original/restored comments to the configured review model.
+sends the source file's original comments and the restored comments to the
+configured review model.
 
 ### API Only
 

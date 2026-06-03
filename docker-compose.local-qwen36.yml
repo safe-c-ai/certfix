@@ -46,7 +46,7 @@ services:
               capabilities: [gpu]
 
   certfix:
-    image: "${CERTFIX_IMAGE:-ghcr.io/safe-c-ai/certfix:0.4.0}"
+    image: "${CERTFIX_IMAGE:-ghcr.io/safe-c-ai/certfix:0.4.1}"
     working_dir: /input
     environment:
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}

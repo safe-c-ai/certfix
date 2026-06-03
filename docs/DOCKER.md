@@ -35,9 +35,9 @@ Use a numbered release tag for normal use. The `edge` image follows the public
 `main` branch and can change after each merge.
 
 ```bash
-docker pull ghcr.io/safe-c-ai/certfix:0.4.0
-docker run --rm ghcr.io/safe-c-ai/certfix:0.4.0 --help
-docker run --rm ghcr.io/safe-c-ai/certfix:0.4.0 certfix-docker --help
+docker pull ghcr.io/safe-c-ai/certfix:0.4.1
+docker run --rm ghcr.io/safe-c-ai/certfix:0.4.1 --help
+docker run --rm ghcr.io/safe-c-ai/certfix:0.4.1 certfix-docker --help
 ```
 
 Tagged release images are published as `ghcr.io/safe-c-ai/certfix:<version>`
@@ -93,7 +93,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.4.0 \
+  ghcr.io/safe-c-ai/certfix:0.4.1 \
   certfix-docker api-check
 ```
 
@@ -110,7 +110,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.4.0 \
+  ghcr.io/safe-c-ai/certfix:0.4.1 \
   certfix-docker api-fix
 ```
 
@@ -150,7 +150,7 @@ docker run --rm \
   -e OPENROUTER_API_KEY \
   -v "$PWD/src:/input:ro" \
   -v "$PWD/certfix-output:/output" \
-  ghcr.io/safe-c-ai/certfix:0.4.0 \
+  ghcr.io/safe-c-ai/certfix:0.4.1 \
   certfix-docker api-fix --profile gemini-3-flash-preview-openrouter
 ```
 
@@ -247,7 +247,8 @@ docker compose -f docker-compose.local-qwen36.yml run --rm certfix certfix-docke
 Use `certfix-docker local-fix --comment-merge` for deterministic
 comment-merged review artifacts, or `--comment-merge-audit` to audit restored
 comments with the configured review model. If you route that review model to an
-API provider, original/restored comments are sent to that provider.
+API provider, the source file's original comments and the restored comments are
+sent to that provider.
 
 ### 4.6 Stop Services
 
@@ -329,7 +330,7 @@ Required for all Compose routes:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `CERTFIX_IMAGE` | `ghcr.io/safe-c-ai/certfix:0.4.0` | certfix CLI image |
+| `CERTFIX_IMAGE` | `ghcr.io/safe-c-ai/certfix:0.4.1` | certfix CLI image |
 | `SOURCE_DIR` | `.` | Host source path mounted read-only at `/input` |
 | `OUTPUT_DIR` | `./certfix-output` | Host output path mounted at `/output` |
 
