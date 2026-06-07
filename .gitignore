@@ -73,6 +73,7 @@ mcp-servers/
 Thumbs.db
 
 # Local/private maintainer notes not included in the initial public repo
+docs/internal/
 docs/research-archive/
 CLAUDE.md
 README.ja.local.md

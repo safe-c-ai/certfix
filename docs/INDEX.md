@@ -11,15 +11,18 @@ started commands, model routes, limitations, and license information.
 | [../README.md](../README.md) | User guide, runtime selection, getting started commands, model routes, limitations, and license |
 | [DOCKER.md](DOCKER.md) | API-only, local `llama-server`, and hybrid Docker usage |
 | [INSTALLATION.md](INSTALLATION.md) | Manual installation, compiler setup, local `llama-server` setup, and non-Docker examples |
+| [FAQ.md](FAQ.md) | Common questions about certfix scope, runtime routes, validation, comments, benchmarks, and review workflow |
 | [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [CONFIGURATION.md](CONFIGURATION.md) | `.certfix.yaml` lookup, bundled profiles, common edits, include paths, advanced routing, and token/context tuning |
 | [LIMITATIONS.md](LIMITATIONS.md) | Full scope, repair, validation, and runtime limitations |
+| [VALIDATION_AND_RETRY.md](VALIDATION_AND_RETRY.md) | Validation gates, retry behavior, and generated fix report fields |
 | [SUPPORTED_RULES.md](SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [QWEN36_MTP_RUNTIME.md](QWEN36_MTP_RUNTIME.md) | Local Qwen3.6-27B MTP `llama-server` setup and runtime notes |
-| [BENCHMARK_SUMMARY.md](BENCHMARK_SUMMARY.md) | release test set results, API cost estimates, and benchmark caveats |
+| [BENCHMARK_SUMMARY.md](BENCHMARK_SUMMARY.md) | v0.1.0 release-test reference and route-selection benchmark caveats |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Release-side architecture, check/fix pipelines, validation gates, and scope boundaries |
+| [DESIGN_RATIONALE.md](DESIGN_RATIONALE.md) | Route-aware, validation-first workflow, model routing, data boundaries, human review boundary, and model evolution |
 | [RESEARCH_NOTES.md](RESEARCH_NOTES.md) | Boundary between public release docs and research/archive materials |
-| [../THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) | Notices for SARIF, CERT-C metadata, and evaluation dataset boundaries |
+| [../THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) | SARIF, CERT-C, and evaluation dataset attribution and license boundaries |
 
 ## Developer Documents
 
@@ -42,14 +45,17 @@ than normal CLI users.
 - Getting started: [README.md](../README.md#1-getting-started)
 - Manual installation and requirements: [INSTALLATION.md](INSTALLATION.md)
 - Docker usage: [DOCKER.md](DOCKER.md)
+- FAQ: [FAQ.md](FAQ.md)
 - Example output: [EXAMPLE_OUTPUT.md](EXAMPLE_OUTPUT.md)
 - Commands: [README.md](../README.md#31-certfix-docker)
 - Model routes: [README.md](../README.md#33-model-routes-and-configuration)
 - Configuration details: [CONFIGURATION.md](CONFIGURATION.md)
 - Limitations: [LIMITATIONS.md](LIMITATIONS.md)
+- Validation and retry: [VALIDATION_AND_RETRY.md](VALIDATION_AND_RETRY.md)
 - Supported rule catalog: [SUPPORTED_RULES.md](SUPPORTED_RULES.md)
 - Local MTP runtime: [QWEN36_MTP_RUNTIME.md](QWEN36_MTP_RUNTIME.md)
 - Benchmark caveats: [BENCHMARK_SUMMARY.md](BENCHMARK_SUMMARY.md)
+- Design rationale: [DESIGN_RATIONALE.md](DESIGN_RATIONALE.md)
 
 Historical experiment records are not included in the initial public
 repository. See [RESEARCH_NOTES.md](RESEARCH_NOTES.md) for the release/research

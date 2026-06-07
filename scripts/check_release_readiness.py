@@ -42,7 +42,7 @@ PUBLIC_CONFIGS = [
 
 INTERNAL_PATTERN = re.compile(
     r"(/work/certfix|certfix-seed-generator|output/phase|run_[0-9]{8}|"
-    r"checkpoint-[0-9]+|sk-[A-Za-z0-9_-]+)"
+    r"checkpoint-[0-9]+|(?<![A-Za-z0-9])sk-[A-Za-z0-9_-]{10,})"
 )
 
 PUBLIC_SCAN_PATHS = [
@@ -70,15 +70,19 @@ PUBLIC_SCAN_PATHS = [
     "docs/BENCHMARK_SUMMARY.md",
     "docs/CONFIGURATION.md",
     "docs/CONTRIBUTING.md",
+    "docs/DESIGN_RATIONALE.md",
     "docs/DOCKER.md",
     "docs/EXAMPLE_OUTPUT.md",
+    "docs/FAQ.md",
     "docs/INSTALLATION.md",
     "docs/LIMITATIONS.md",
     "docs/QWEN36_MTP_RUNTIME.md",
     "docs/INDEX.md",
+    "docs/MODEL_SMOKE_SUITE.md",
     "docs/RELEASE_CHECKLIST.md",
     "docs/RESEARCH_NOTES.md",
     "docs/SUPPORTED_RULES.md",
+    "docs/VALIDATION_AND_RETRY.md",
 ]
 
 EXCLUDED_SAMPLE_DATA = [
@@ -90,6 +94,7 @@ EXCLUDED_SAMPLE_DATA = [
 
 EXCLUDED_PUBLIC_PATHS = [
     "CLAUDE.md",
+    "docs/internal",
     "docs/research-archive",
     "eval-splits",
     *EXCLUDED_SAMPLE_DATA,
@@ -391,6 +396,7 @@ def check_sdist_exclude_config() -> list[CheckResult]:
     excludes = set(sdist.get("exclude", []))
     expected = {
         "/CLAUDE.md",
+        "/docs/internal",
         "/docs/research-archive",
         "/eval-splits",
         "/model-smoke-results",

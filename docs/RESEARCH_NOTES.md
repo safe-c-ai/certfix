@@ -9,16 +9,20 @@ surface for the current public release. Normal users should be able to
 understand and use certfix from the README, release docs, configs, and CLI help
 without needing any experiment-side assets.
 
-Historical research records are retained outside the initial public repository
-for maintainer traceability. They include design notes, backlog records, model
-intake notes, and experiment-derived reports that explain why earlier
-implementation choices were made.
+Historical research and internal maintainer records are retained outside the
+initial public repository for maintainer traceability. They include design
+notes, backlog records, model intake notes, local user notes, and
+experiment-derived reports that explain why earlier implementation choices were
+made.
 
 Research archive files are not user setup documentation. If a separately
 sanitized archive is published later, it may mention older model names, older
 plans, older benchmark values, internal experiment phrasing, or approaches that
 are no longer the release default. Those references should not be interpreted as
 current public requirements or as the recommended user workflow.
+
+Local-only files under `docs/internal/` are maintainer notes and are not part of
+the public release surface.
 
 For the public release path, prefer these documents:
 

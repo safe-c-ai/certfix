@@ -5,6 +5,21 @@
 certfix detects CERT-C issue candidates in C code and generates reviewable
 fixed-code candidates and patches with LLMs.
 
+certfix is a route-aware LLM-assisted C repair workflow for CERT-C issue
+candidates. It treats model output as reviewable fixed-code candidates, not
+trusted source changes.
+
+The goal is not to ask one model to autonomously rewrite a codebase. The goal is
+to route detection, repair, validation, retry, and review work across local
+models, API models, programmatic gates, and human review under real-world
+constraints such as quality, cost, latency, source-code confidentiality,
+reproducibility, and trust.
+
+certfix does not modify source files in place. A `fixed` result means the
+candidate passed the enabled certfix validation gates for that run; it is not a
+proof of semantic correctness, security correctness, or project integration
+safety.
+
 certfix complements static analyzers by producing repair candidates, not just
 diagnostics. Docker is the recommended runtime for normal use. Non-Docker
 installation and direct `llama-server` operation are available for advanced or
@@ -360,15 +375,18 @@ caveats.
 | [docs/INDEX.md](docs/INDEX.md) | Documentation index |
 | [docs/DOCKER.md](docs/DOCKER.md) | API-only, local `llama-server`, and hybrid Docker usage |
 | [docs/INSTALLATION.md](docs/INSTALLATION.md) | Manual installation, compiler setup, and direct runtime setup |
+| [docs/FAQ.md](docs/FAQ.md) | Common questions about runtime/data boundaries, validation, model routing, human review, and benchmarks |
 | [docs/EXAMPLE_OUTPUT.md](docs/EXAMPLE_OUTPUT.md) | Before/after example and generated artifact walkthrough |
 | [docs/CONFIGURATION.md](docs/CONFIGURATION.md) | Config lookup, bundled profiles, include paths, advanced routing, and token/context tuning |
 | [docs/LIMITATIONS.md](docs/LIMITATIONS.md) | Full scope, repair, validation, and runtime limitations |
+| [docs/VALIDATION_AND_RETRY.md](docs/VALIDATION_AND_RETRY.md) | Validation gates, retry behavior, and generated fix report fields |
 | [docs/SUPPORTED_RULES.md](docs/SUPPORTED_RULES.md) | Supported CERT-C rule target catalog and category coverage |
 | [docs/QWEN36_MTP_RUNTIME.md](docs/QWEN36_MTP_RUNTIME.md) | Local Qwen3.6 MTP `llama-server` setup and verified runtime notes |
-| [docs/BENCHMARK_SUMMARY.md](docs/BENCHMARK_SUMMARY.md) | benchmark summary, release test set aggregate results, and caveats |
+| [docs/BENCHMARK_SUMMARY.md](docs/BENCHMARK_SUMMARY.md) | v0.1.0 release-test reference and route-selection benchmark caveats |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Release-side architecture and pipeline design |
+| [docs/DESIGN_RATIONALE.md](docs/DESIGN_RATIONALE.md) | Route-aware, validation-first workflow, model routing, data boundaries, human review boundary, and model evolution |
 | [docs/RESEARCH_NOTES.md](docs/RESEARCH_NOTES.md) | Boundary between public release docs and research/archive materials |
-| [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | SARIF, CERT-C metadata, and dataset boundary notices |
+| [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | SARIF, CERT-C, and evaluation dataset attribution and license boundaries |
 
 ## 6. License
 

@@ -96,8 +96,8 @@ log. Wheel install-equivalent config list/write/doctor/check also passed.
   Compose routes and state the host GPU/runtime requirements.
 - [ ] Public docs avoid internal Phase/Run/checkpoint identifiers as primary
   user guidance.
-- [ ] `CLAUDE.md` and `docs/research-archive/` are not present in the initial
-  public repository.
+- [ ] `CLAUDE.md`, `docs/internal/`, and `docs/research-archive/` are not
+  present in the initial public repository.
 - [ ] `THIRD_PARTY_NOTICES.md` is present and references SARIF and CERT-C rule
   metadata boundaries.
 - [ ] Wheel users can read third-party notices:

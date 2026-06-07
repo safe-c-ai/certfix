@@ -25,8 +25,20 @@ keep the project license boundary clear.
 ## Evaluation Datasets
 
 Juliet, PrimeVul, calibration, holdout evaluation sample files, and derived
-evaluation split metadata are not bundled in the initial public v0.1.0 package.
+evaluation split metadata are not bundled in public releases.
 Maintainer scripts may generate local `*samples.jsonl.gz` files or
 `eval-splits/` metadata for maintainer-side benchmarking, but those generated
 datasets require separate source, license, and attribution review before public
 redistribution.
+
+Juliet reference benchmark summaries may cite aggregate results computed from
+the official Juliet C/C++ 1.3 suite, which its official records describe as
+public-domain benchmark material. The public repository should not include
+Juliet source files or generated Juliet subset manifests unless their source,
+license, checksum, and attribution boundaries have been reviewed for the
+specific release.
+
+- NIST SARD test suite 112, Juliet C/C++ 1.3:
+  `https://samate.nist.gov/SARD/test-suites/112`
+- Zenodo record for Juliet Test Suite for C/C++ 1.3:
+  `https://zenodo.org/records/4701387`
